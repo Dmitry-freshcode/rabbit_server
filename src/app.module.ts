@@ -19,10 +19,11 @@ import { UserModule } from './user/user.module';
       useUnifiedTopology: true,
       useCreateIndex: true,
     }),
-    AuthModule,
-    UserModule
+    //AuthModule   
   ],
   controllers: [AppController],
-  providers: [AuthModule,AppService],
+  providers: [
+    AuthModule,
+    AppService],
 })
 export class AppModule {}

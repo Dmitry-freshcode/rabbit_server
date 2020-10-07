@@ -1,6 +1,6 @@
 import { Schema ,model} from 'mongoose';
 
-export const UserSchema = new Schema({
+export const ProfileSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',

@@ -11,7 +11,7 @@ import {UserRepository} from '../user/user.repository';
 @Module({
   imports: [    
     //JwtStrategy,
-    UserRepository,
+    
     UserService,    
     PassportModule,      
     JwtModule.register({
@@ -20,7 +20,7 @@ import {UserRepository} from '../user/user.repository';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy,LocalStrategy],
+  providers: [AuthService, JwtStrategy,LocalStrategy,UserRepository,],
   exports: [AuthService]
 })
 export class AuthModule {}

@@ -1,6 +1,8 @@
 import { Injectable ,HttpException,HttpStatus,UnauthorizedException} from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/createUser.dto';
+import { CreateUserProfileDto } from './dto/createUserProfile.dto'
+import { SuccessDto } from './dto/success.dto';
 import { IUser } from './interfaces/user.interface';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
@@ -9,25 +11,23 @@ import * as _ from 'lodash';
 @Injectable()
 export class UserService {
     constructor(  
-      private userDB:UserRepository,
+     private userDB:UserRepository,
     ) {}
   
-    async create(createUserDto: CreateUserDto): Promise<object> { 
-      try{
-        const isExist = await this.userDB.findUser({ email: createUserDto.email });           
-        if (!isExist){        
-            const saltRounds = 10;
-            const salt = await bcrypt.genSalt(saltRounds);
-            const hash = await bcrypt.hash(createUserDto.password, salt);   
-            const createdUser = _.assign(createUserDto, { password: hash });          
-            this.userDB.create(createdUser);
-            return {statusCode: 201, message: "user created"};
-        }else{
-          throw new UnauthorizedException({status:'user is Exist'});           
-        }
-      }catch{      
-        throw new HttpException('user is Exist', HttpStatus.BAD_REQUEST);
-      }    
+    async register(createUser: CreateUserDto, profile:CreateUserProfileDto): Promise<SuccessDto> { 
+        if (!createUser.password){
+          throw new HttpException('Password must not be empty', HttpStatus.CONFLICT);
+        }     
+        const userByEmail = await this.userDB.findUser({ email: createUser.email });
+        if (userByEmail) {
+          throw new HttpException('User with this email address already exists', HttpStatus.CONFLICT);
+        };              
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hash = await bcrypt.hash(createUser.password, salt);   
+        const createdUser = _.assign(createUser, { password: hash });          
+        this.userDB.createUser(createdUser,profile);       
+        return { success: true };       
     }
   
   
