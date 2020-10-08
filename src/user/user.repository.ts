@@ -2,7 +2,9 @@ import { IUser } from './interfaces/user.interface';
 import { IUserProfile } from './interfaces/userProfile.interface';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/createUser.dto';
-import { CreateUserProfileDto } from './dto/createUserProfile.dto'
+import { CreateUserProfileDto } from './dto/createUserProfile.dto';
+import { IRegistration } from './interfaces/registration.interface'
+import { ConfirmUserDto } from './dto/confirmUser.dto'
 import { FindUserDto } from './dto/findUser.dto'
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,23 +16,43 @@ export class UserRepository{
         @InjectModel('User')
         private userModel: Model<IUser>,
         @InjectModel('Profile')
-        private userProfileModel: Model<IUserProfile>
+        private userProfileModel: Model<IUserProfile>,
+        @InjectModel('Registration')
+        private registrationModel: Model<IRegistration>
         ){}
 
-    async createUser(User:CreateUserDto,Profile:CreateUserProfileDto):Promise<CreateUserProfileDto>{
+    async createUser(User:CreateUserDto):Promise<IUser>{
         const user = new this.userModel(User);
-        const newUser = await user.save();
-        const idUser = newUser._id;
-        const profile = new this.userProfileModel({...Profile, userId:idUser});        
+        return await user.save();
+    }
+
+    async createProfile(User:IUser,Profile:CreateUserProfileDto):Promise<CreateUserProfileDto>{        
+        const profile = new this.userProfileModel({...Profile, userId:User._id});        
         return await profile.save();
     }
+
+    async createRegistration(User:IUser,token:string):Promise<IRegistration>{        
+        const registration = new this.registrationModel({token, userId:User._id});        
+        return await registration.save();
+    }
+    async deleteRegistration(token:string):Promise<any>{  
+       return await this.registrationModel.deleteOne({"token":token});
+    }
+    async findRegistration(token:ConfirmUserDto):Promise<IRegistration>{  
+        return await this.registrationModel.findOne(token).exec();
+    }
+
 
     // async createUserProfile(User:CreateUserDto,Profile:CreateUserProfileDto,):Promise<CreateUserProfileDto>{
     //     const profile = new this.userProfileModel({...Profile, });
     //     return await profile.save();
     // }
 
-    async findUser(data:FindUserDto):Promise<IUser | undefined>{    
-        return await this.userModel.findOne(data).exec();
+    async findUserByEmail(user:CreateUserDto):Promise<IUser | undefined>{                
+        return await this.userModel.findOne({email:user.email}).exec();
+    }
+
+    async findProfileByUser(user:IUser):Promise<IUserProfile | undefined>{            
+        return await this.userProfileModel.findOne({userId:user._id}).exec();        
     }
 }

@@ -7,9 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
 
+
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({isGlobal: true}),
     UserModule,
     MongooseModule.forRoot(
       //'mongodb://localhost/nest',
@@ -23,7 +24,7 @@ import { UserModule } from './user/user.module';
   ],
   controllers: [AppController],
   providers: [
-    AuthModule,
+    //AuthModule,
     AppService],
 })
 export class AppModule {}

@@ -19,7 +19,7 @@ SwaggerModule.setup('api', app, document);
 app.enableCors(); 
 app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 await app.listen(port);
-console.log(`server listen on ${port} port`)
+console.log(`server listen on ${process.env.APP_PORT} port`)
 
 }
 bootstrap();

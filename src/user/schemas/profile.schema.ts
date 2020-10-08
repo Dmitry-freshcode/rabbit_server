@@ -12,9 +12,8 @@ export const ProfileSchema = new Schema({
     birthday: {type: Date, required:true},
     city: {type: String, required:true},
     state: {type: String, required:true},
-    role: {type:String, enum:['user','staff','admin'] , required:true},
-    isActive: {type: Boolean, default: false},
-    isOnline: {type: Boolean, default: false},
+    role: {type:String, enum:['user','staff','admin'] , required:true},    
+    isOnline: {type: Boolean, required:true, default: false},
 },{
     timestamps: {
       createdAt: 'created_at',

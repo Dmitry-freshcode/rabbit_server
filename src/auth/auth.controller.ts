@@ -8,12 +8,12 @@ export class AuthController {
     constructor(
         private authService: AuthService,              
       ) {}  
-      @UseGuards(LocalAuthGuard)  
-      @Post('login')
-      async login(@Body() loginUser:LoginUserDto) {
-        //console.log(body)
-        //return {status:"login"};
-        return this.authService.login(loginUser);
-      }
+      // @UseGuards(LocalAuthGuard)  
+      // @Post('login')
+      // async login(@Body() loginUser:LoginUserDto) {
+      //   //console.log(body)
+      //   //return {status:"login"};
+      //   return this.authService.login(loginUser);
+      // }
 
 }

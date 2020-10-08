@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsBoolean, IsEmail, IsNumber, IsArray, ArrayNotEmpty, ArrayUnique, Validate } from 'class-validator';
+import { IsString, IsNotEmpty} from 'class-validator';
 
 export class CreateUserProfileDto { 
     @ApiProperty({
@@ -43,15 +43,5 @@ export class CreateUserProfileDto {
       })
     @IsString()
     @IsNotEmpty() 
-    role: string;
-    @ApiProperty({
-        format: 'boolean',
-      })
-    @IsBoolean()    
-    isActive: boolean;
-    @ApiProperty({
-        format: 'boolean',
-      })
-    @IsBoolean()    
-    isOnline: boolean;  
+    role: string;    
 }
