@@ -32,14 +32,17 @@ export class UserRepository{
     }
 
     async createRegistration(User:IUser,token:string):Promise<IRegistration>{        
-        const registration = new this.registrationModel({token, userId:User._id});        
+        const registration = new this.registrationModel({
+            token,
+            userId:User._id,            
+        });        
         return await registration.save();
     }
     async deleteRegistration(token:string):Promise<any>{  
        return await this.registrationModel.deleteOne({"token":token});
     }
-    async findRegistration(token:ConfirmUserDto):Promise<IRegistration>{  
-        return await this.registrationModel.findOne(token).exec();
+    async findRegistration(token:string):Promise<IRegistration>{  
+        return await this.registrationModel.findOne({token}).exec();
     }
 
 
@@ -48,11 +51,11 @@ export class UserRepository{
     //     return await profile.save();
     // }
 
-    async findUserByEmail(user:CreateUserDto):Promise<IUser | undefined>{                
-        return await this.userModel.findOne({email:user.email}).exec();
+    async findUserByEmail(email:string):Promise<IUser | undefined>{                
+        return await this.userModel.findOne({email:email}).exec();
     }
 
-    async findProfileByUser(user:IUser):Promise<IUserProfile | undefined>{            
-        return await this.userProfileModel.findOne({userId:user._id}).exec();        
+    async findProfileByUserId(userId:string):Promise<IUserProfile | undefined>{            
+        return await this.userProfileModel.findOne({userId:userId}).exec();        
     }
 }

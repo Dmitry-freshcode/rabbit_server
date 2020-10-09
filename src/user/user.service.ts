@@ -8,6 +8,7 @@ import { IUser } from './interfaces/user.interface';
 import * as nodemailer from 'nodemailer';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 
 
 
@@ -20,7 +21,7 @@ export class UserService {
     ) {}
   
     async register(createUser: CreateUserDto): Promise<SuccessDto> {             
-        const userByEmail = await this.userDB.findUserByEmail(createUser);
+        const userByEmail = await this.userDB.findUserByEmail(createUser.email);
         if (userByEmail) {
           throw new HttpException('User with this email address already exists', HttpStatus.CONFLICT);
         };              
@@ -36,30 +37,47 @@ export class UserService {
 
     async sendConfirmation(user: IUser): Promise<void> {      
       const expiresIn = 60 * 60 * 24;
+      //const expiresIn = 60 ;
       const tokenPayload = {
         _id: user._id,
         email:user.email,
-        status: user.isActive       
+        //status: user.isActive       
       };  
-      const token = await this.jwtService.sign(tokenPayload, { expiresIn:expiresIn,secret:'dfdfg' });      
+      const token = await this.jwtService.sign(tokenPayload, { expiresIn:expiresIn,secret:process.env.SECRET });      
       this.userDB.createRegistration(user,token);     
       this.sendMail(token,user); 
       this.logger.log(`send confirmation email to ${user.email}`);  
     }
 
-    async confirmUser(token:string): Promise<SuccessDto>{  
+    async updateMail(email:string): Promise<SuccessDto>{
+      const user = await this.userDB.findUserByEmail(email);
+      await this.sendConfirmation(user);
+      return { success: true };
+    }
 
-      this.userDB.deleteRegistration(token);
-      const encode = await this.jwtService.decode(token);
-      console.log(encode);  
-      //this.logger.log(`register ${user.email}`); 
-      return { success: true }
+    async confirmUser(token:string): Promise<any>{ 
+
+      const tokenDb = await this.userDB.findRegistration(token);
+      if(tokenDb && moment(tokenDb.expireAt).isAfter(Date.now())){
+          const decoded = await this.jwtService.decode(token,{json:true});
+          const isProfile = await this.userDB.findProfileByUserId(decoded._id)
+          return {
+            isProfile: (isProfile)?true:false,
+            isTokenValid: true,
+            userId:decoded._id          
+          }         
+        };
+      return {          
+        isProfile: false,
+        isTokenValid: false,
+        userId:'',           
+      }
     }
 
 
     async addInfo(createUser: CreateUserDto, profile:CreateUserProfileDto): Promise<SuccessDto> {
-      const userByEmail = await this.userDB.findUserByEmail(createUser);
-      const findProfile = await this.userDB.findProfileByUser(userByEmail);
+      const userByEmail = await this.userDB.findUserByEmail(createUser.email);
+      const findProfile = await this.userDB.findProfileByUserId(userByEmail._id);
       if(findProfile){
         throw new HttpException('Profile with this email address already exists', HttpStatus.CONFLICT);
       }
@@ -82,7 +100,7 @@ export class UserService {
         to: `${user.email}`, // list of receivers
         subject: "Сomplete registration", // Subject line
         text: "Сomplete registration", // plain text body
-        html: `Сomplete registration by clicking on the link : </br>${process.env.APP_URL}/user/confirmUser?token=${token}`, // html body
+        html: `Сomplete registration by clicking on the link : </br>${process.env.APP_URL}/confirm/${token}`, // html body
       });
     };
 

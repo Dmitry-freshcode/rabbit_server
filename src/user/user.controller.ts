@@ -48,7 +48,17 @@ export class UserController {
       async confirm(@Query('token') token: string): Promise<SuccessDto> {            
       this.logger.log(`confirm user with token  ${token}`); 
       return this.userService.confirmUser(token);  
-    }  
+    }
+
+    @Get('updateToken')
+    @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+      async updateToken(
+      @Body() email: string,             
+        ): Promise<SuccessDto> {            
+      this.logger.log(`update mail to ${email}`); 
+      return this.userService.updateMail(email);  
+  }
+     
 
 
 }
