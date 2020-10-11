@@ -2,15 +2,12 @@ import { Module } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import {UserRepository} from './user.repository';
+import { ProfileRepository } from './profile.repository'
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from './schemas/user.schema';
 import { ProfileSchema } from './schemas/profile.schema';
-import { RegistrationSchema } from './schemas/registration.schema'
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
-
-
-
 
 @Module({
   imports: [
@@ -18,8 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     //JwtService,
     MongooseModule.forFeature([
       {name: 'User', schema: UserSchema},
-      {name: 'Profile', schema: ProfileSchema},
-      {name: 'Registration', schema: RegistrationSchema}
+      {name: 'Profile', schema: ProfileSchema},     
     ]),
     JwtModule.register({
       secret: process.env.SECRET,
@@ -31,9 +27,10 @@ import { ConfigModule } from '@nestjs/config';
   providers: [
     UserService,
     UserRepository,
+    ProfileRepository
    // JwtService
   ],
-  exports: [UserService],
+  exports: [UserRepository],
 })
 export class UserModule {}
 

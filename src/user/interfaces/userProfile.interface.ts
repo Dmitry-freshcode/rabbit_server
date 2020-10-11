@@ -7,6 +7,6 @@ export interface IUserProfile extends Document {
     readonly birthday: Date,
     readonly city: string,
     readonly state: string,
-    readonly role: string,    
+    readonly userId: string,    
     readonly isOnline: boolean,   
   }

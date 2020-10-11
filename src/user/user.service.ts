@@ -1,6 +1,7 @@
 import { Injectable ,HttpException,HttpStatus,Logger} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from './user.repository';
+import { ProfileRepository } from './profile.repository'
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
 import { SuccessDto } from './dto/success.dto';
@@ -16,13 +17,14 @@ import * as moment from 'moment';
 export class UserService {
   private readonly logger = new Logger(UserService.name);
     constructor(  
-     private userDB:UserRepository,
+     private userDB:UserRepository,  
+     private profileDB:ProfileRepository, 
      private readonly jwtService: JwtService,
     ) {}
   
     async register(createUser: CreateUserDto): Promise<SuccessDto> {             
         const userByEmail = await this.userDB.findUserByEmail(createUser.email);
-        if (userByEmail) {
+        if (userByEmail && userByEmail.role===createUser.role) {
           throw new HttpException('User with this email address already exists', HttpStatus.CONFLICT);
         };              
         const saltRounds = 10;
@@ -36,52 +38,54 @@ export class UserService {
     }
 
     async sendConfirmation(user: IUser): Promise<void> {      
-      const expiresIn = 60 * 60 * 24;
-      //const expiresIn = 60 ;
+      const expiresIn = 60 * 60 * 24;      
       const tokenPayload = {
         _id: user._id,
-        email:user.email,
-        //status: user.isActive       
+        email:user.email,           
       };  
-      const token = await this.jwtService.sign(tokenPayload, { expiresIn:expiresIn,secret:process.env.SECRET });      
-      this.userDB.createRegistration(user,token);     
-      this.sendMail(token,user); 
-      this.logger.log(`send confirmation email to ${user.email}`);  
+      const token = await this.jwtService.sign(tokenPayload, { expiresIn:expiresIn,secret:process.env.SECRET });    
+      this.sendMail(token,user);       
     }
 
     async updateMail(email:string): Promise<SuccessDto>{
       const user = await this.userDB.findUserByEmail(email);
-      await this.sendConfirmation(user);
-      return { success: true };
+      if(user.status==='notConfirmed'){       
+        await this.sendConfirmation(user);         
+        return { success: true };
+      }
+      throw new HttpException('User with this email not found', HttpStatus.CONFLICT);
     }
 
     async confirmUser(token:string): Promise<any>{ 
-
-      const tokenDb = await this.userDB.findRegistration(token);
-      if(tokenDb && moment(tokenDb.expireAt).isAfter(Date.now())){
-          const decoded = await this.jwtService.decode(token,{json:true});
-          const isProfile = await this.userDB.findProfileByUserId(decoded._id)
-          return {
-            isProfile: (isProfile)?true:false,
-            isTokenValid: true,
-            userId:decoded._id          
-          }         
-        };
+          const decoded = await this.jwtService.decode(token,{json:true}); 
+          const user = await this.userDB.findUserById(decoded['_id']);      
+          const isProfile = await this.profileDB.findProfileByUserId(decoded['_id']);  
+          if(user.status==='notConfirmed' && moment(new Date(decoded['exp']*1000)).isAfter(Date.now())){ 
+            this.logger.log(`confirm ${user.email} user`);          
+            return {
+              isProfile: (isProfile)?true:false,
+              isTokenValid: true,
+              userId:decoded['_id'],                   
+            }  
+          }  
+          this.logger.log(`wrong confirm token`);   
       return {          
-        isProfile: false,
+        isProfile: (isProfile)?true:false,
         isTokenValid: false,
         userId:'',           
       }
     }
 
 
-    async addInfo(createUser: CreateUserDto, profile:CreateUserProfileDto): Promise<SuccessDto> {
-      const userByEmail = await this.userDB.findUserByEmail(createUser.email);
-      const findProfile = await this.userDB.findProfileByUserId(userByEmail._id);
+    async addInfo(profile:CreateUserProfileDto): Promise<SuccessDto> {
+      const user = await this.userDB.findUserById(profile.userId);
+      const findProfile = await this.profileDB.findProfileByUserId(user._id);
       if(findProfile){
         throw new HttpException('Profile with this email address already exists', HttpStatus.CONFLICT);
       }
-      this.userDB.createProfile(userByEmail,profile);       
+      await this.profileDB.createProfile(profile);
+      await this.userDB.updateStatus(profile.userId,'Confirmed');   
+      this.logger.log(`add profile for ${user.email}`);  
       return { success: true };       
     }
 
@@ -95,13 +99,13 @@ export class UserService {
           pass: `${process.env.SEND_MAIL_PASSWORD}`, // generated ethereal password
         },
       });
-
-      const info = await transporter.sendMail({     
+      await transporter.sendMail({     
         to: `${user.email}`, // list of receivers
         subject: "Сomplete registration", // Subject line
         text: "Сomplete registration", // plain text body
-        html: `Сomplete registration by clicking on the link : </br>${process.env.APP_URL}/confirm/${token}`, // html body
+        html: `Сomplete registration by clicking on the link : </br>${process.env.FRONT_URL}/confirm/${token}`, // html body
       });
+      this.logger.log(`send confirmation email to ${user.email}`); 
     };
 
   }

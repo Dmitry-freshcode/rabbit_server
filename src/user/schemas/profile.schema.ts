@@ -1,4 +1,4 @@
-import { Schema ,model} from 'mongoose';
+import { Schema } from 'mongoose';
 
 export const ProfileSchema = new Schema({
     userId: {
@@ -11,8 +11,7 @@ export const ProfileSchema = new Schema({
     middleName: {type: String, required:true},
     birthday: {type: Date, required:true},
     city: {type: String, required:true},
-    state: {type: String, required:true},
-    role: {type:String, enum:['user','staff','admin'] , required:true},    
+    state: {type: String, required:true},    
     isOnline: {type: Boolean, required:true, default: false},
 },{
     timestamps: {

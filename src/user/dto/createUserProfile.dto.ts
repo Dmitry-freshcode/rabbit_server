@@ -43,5 +43,5 @@ export class CreateUserProfileDto {
       })
     @IsString()
     @IsNotEmpty() 
-    role: string;    
+    userId: string;    
 }

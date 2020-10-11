@@ -12,19 +12,18 @@ import { UserModule } from './user/user.module';
   imports: [
     ConfigModule.forRoot({isGlobal: true}),
     UserModule,
-    MongooseModule.forRoot(
-      //'mongodb://localhost/nest',
+    MongooseModule.forRoot(      
       process.env.MONGODB_CONNECTION_STRING,
       {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
     }),
-    //AuthModule   
+    AuthModule   
   ],
   controllers: [AppController],
   providers: [
-    //AuthModule,
+    AuthModule,
     AppService],
 })
 export class AppModule {}

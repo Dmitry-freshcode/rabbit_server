@@ -1,11 +1,9 @@
 import {
     Controller,
     Body,
-    Logger,
-    Param,
+    Logger,   
     Query,    
-    UseGuards,
-    Request,    
+    UseGuards,       
     Get,
     Post,  
   } from '@nestjs/common';
@@ -13,7 +11,6 @@ import {
   import { UserService } from './user.service';
   import {CreateUserDto} from './dto/createUser.dto';
   import { CreateUserProfileDto } from './dto/createUserProfile.dto';
-  import { ConfirmUserDto } from './dto/confirmUser.dto';
   import {SuccessDto} from './dto/success.dto';
 
 @ApiTags('user')
@@ -28,36 +25,29 @@ export class UserController {
     @Post('register')
     @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
       async addUser(
-        @Body() user: CreateUserDto): Promise<SuccessDto> {            
-      this.logger.log(`register ${user.email}`);     
-      return this.userService.register(user);  
+        @Body() user: CreateUserDto): Promise<SuccessDto> {         
+        return this.userService.register(user);  
     }
 
     @Post('profile')
-      @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-        async addProfile(
-        @Body() user: CreateUserDto,
+    @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+        async addProfile(        
         @Body() profile: CreateUserProfileDto,        
-          ): Promise<SuccessDto> {            
-        this.logger.log(`add info ${user.email}`); 
-        return this.userService.addInfo(user,profile);  
+          ): Promise<SuccessDto> {        
+          return this.userService.addInfo(profile);  
     }
 
     @Get('confirmUser')
     @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-      async confirm(@Query('token') token: string): Promise<SuccessDto> {            
-      this.logger.log(`confirm user with token  ${token}`); 
-      return this.userService.confirmUser(token);  
+      async confirm(@Query('token') token: string): Promise<SuccessDto> {       
+       return this.userService.confirmUser(token);  
     }
 
     @Get('updateToken')
     @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-      async updateToken(
-      @Body() email: string,             
-        ): Promise<SuccessDto> {            
-      this.logger.log(`update mail to ${email}`); 
-      return this.userService.updateMail(email);  
-  }
+      async updateToken(@Query('email') email: string): Promise<SuccessDto>{      
+        return this.userService.updateMail(email);  
+   }
      
 
 
