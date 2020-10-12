@@ -4,7 +4,7 @@ export class LoginUserDto {
     @ApiProperty({
         format: 'string',
       })  
-    readonly email: string;
+    readonly username: string;
     @ApiProperty({
         format: 'string',
       }) 

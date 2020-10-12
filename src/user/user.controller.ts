@@ -5,13 +5,18 @@ import {
     Query,    
     UseGuards,       
     Get,
-    Post,  
+    Post,
+    UseInterceptors, 
+    UploadedFiles,
+     
   } from '@nestjs/common';
+  import { FileInterceptor,} from '@nestjs/platform-express';
   import { ApiTags, ApiResponse } from '@nestjs/swagger';
   import { UserService } from './user.service';
   import {CreateUserDto} from './dto/createUser.dto';
   import { CreateUserProfileDto } from './dto/createUserProfile.dto';
   import {SuccessDto} from './dto/success.dto';
+  import { diskStorage } from 'multer';
 
 @ApiTags('user')
 @Controller('user')
@@ -48,6 +53,18 @@ export class UserController {
       async updateToken(@Query('email') email: string): Promise<SuccessDto>{      
         return this.userService.updateMail(email);  
    }
+
+   @Post('upload')
+   @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './upload',        
+      }),      
+    }),
+  )
+   uploadFile(@UploadedFiles() files) {
+    console.log(files);
+  }
      
 
 

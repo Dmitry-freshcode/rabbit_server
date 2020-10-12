@@ -8,6 +8,7 @@ import { UserSchema } from './schemas/user.schema';
 import { ProfileSchema } from './schemas/profile.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -20,6 +21,9 @@ import { ConfigModule } from '@nestjs/config';
     JwtModule.register({
       secret: process.env.SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRE },
+    }),
+    MulterModule.register({
+      dest: '/upload',
     }),
     
   ],

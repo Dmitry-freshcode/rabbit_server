@@ -5,6 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { ServicesModule } from './services/services.module';
+import { CategoryModule } from './category/category.module';
+import { OrderModule } from './order/order.module';
+import { ChatModule } from './chat/chat.module';
 
 
 
@@ -19,7 +23,11 @@ import { UserModule } from './user/user.module';
       useUnifiedTopology: true,
       useCreateIndex: true,
     }),
-    AuthModule   
+    AuthModule,
+    ServicesModule,
+    CategoryModule,
+    OrderModule,
+    ChatModule   
   ],
   controllers: [AppController],
   providers: [

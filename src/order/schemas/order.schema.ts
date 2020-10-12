@@ -1,7 +1,8 @@
-import { timeStamp } from 'console';
-import { Schema, model } from 'mongoose';
+//import { timeStamp } from 'console';
+import { Schema } from 'mongoose';
 
-const OrderSchema = new Schema({
+
+export const OrderSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -18,8 +19,8 @@ const OrderSchema = new Schema({
         required:true
     },
     status:{type:String,enum:['done','not performed','performed'],required: true, default:'performed'},
-    timeStart:{type: timeStamp,required: true},
-    timeEnd:{type: timeStamp,required: true}
+    timeStart:{type: Date,required: true},
+    timeEnd:{type: Date,required: true}
 
 },{
     timestamps: {
@@ -27,5 +28,3 @@ const OrderSchema = new Schema({
       updatedAt: 'updated_at',
     }
   });
-
-export const Order = model('Order',OrderSchema);

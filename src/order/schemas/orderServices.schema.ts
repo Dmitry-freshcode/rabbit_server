@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
-const OrderServiceSchema = new Schema({
+export const OrderServiceSchema = new Schema({
     serviceId: {
         type: Schema.Types.ObjectId,
         ref: 'Service',
@@ -12,5 +12,4 @@ const OrderServiceSchema = new Schema({
         required:true
     },    
 });
-
-export const OrderService = model('OrderService',OrderServiceSchema);
+ 
