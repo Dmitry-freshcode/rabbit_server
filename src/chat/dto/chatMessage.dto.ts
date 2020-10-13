@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsDateString } from 'class-validator';
 
-export class CreateOrderDto { 
+export class ChatMessageDto { 
     @ApiProperty({
         format: 'string',
       }) 
@@ -11,25 +11,25 @@ export class CreateOrderDto {
         format: 'string',
       }) 
     @IsString()    
-    staffId: string;
+    chatId: string;
     @ApiProperty({
         format: 'string',
       }) 
     @IsString()    
-    categoryId: string;
+    message: string;
     @ApiProperty({
-        format: 'string',
+        format: 'Date',
+      }) 
+    @IsDateString()    
+    created_at: Date;
+    @ApiProperty({
+        format: 'Date',
+      }) 
+    @IsDateString()    
+    updated_at: Date;
+    @ApiProperty({
+        format: 'Date',
       }) 
     @IsString()    
-    status: string;
-    @ApiProperty({
-        format: 'Date',
-      }) 
-    @IsDateString()    
-    timeStart: Date;
-    @ApiProperty({
-        format: 'Date',
-      }) 
-    @IsDateString()    
-    timeEnd: Date;
+    firstName: string;
 }

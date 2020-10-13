@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
-const ChatMemberSchema = new Schema({
+export const ChatMemberSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'Service',
@@ -10,7 +10,10 @@ const ChatMemberSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Chat',
         required:true
-    },    
-});
-
-export const ChatMember = model('ChatMember',ChatMemberSchema);
+    } 
+},{
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',      
+    }  
+} );

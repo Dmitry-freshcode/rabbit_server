@@ -4,7 +4,7 @@ import { UserRepository } from './user.repository';
 import { ProfileRepository } from './profile.repository'
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
-import { SuccessDto } from './dto/success.dto';
+import { SuccessDto } from '../shared/dto/success.dto';
 import { IUser } from './interfaces/user.interface';
 import * as nodemailer from 'nodemailer';
 import * as bcrypt from 'bcrypt';

@@ -9,12 +9,11 @@ import { InjectModel } from '@nestjs/mongoose';
 export class OrderRepository{
     constructor(
         @InjectModel('Order')
-        private orderModel: Model<IOrder>,
-      
+        private orderModel: Model<IOrder>      
         ){}
 
-    async findAll():Promise<IOrder[] | undefined>{                     
-        return await this.orderModel.find({}).exec();
+    async findAll(query):Promise<IOrder[] | undefined>{                     
+        return await this.orderModel.find(query).exec();
     }
     async createOrder(Order:CreateOrderDto):Promise<IOrder>{
         const order = new this.orderModel(Order);

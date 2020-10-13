@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
-const MessageSchema = new Schema({
+export const MessageSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -14,8 +14,7 @@ const MessageSchema = new Schema({
     message: {type: String, required:true},        
 },{
     timestamps: {
-      createdAt: 'created_at',      
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',      
     }
   });
-
-export const Message = model('Message',MessageSchema);

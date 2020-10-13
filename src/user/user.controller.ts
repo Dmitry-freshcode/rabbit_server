@@ -13,18 +13,19 @@ import {
   import { FileInterceptor,} from '@nestjs/platform-express';
   import { ApiTags, ApiResponse } from '@nestjs/swagger';
   import { UserService } from './user.service';
+  import { UserRepository } from './user.repository'
   import {CreateUserDto} from './dto/createUser.dto';
   import { CreateUserProfileDto } from './dto/createUserProfile.dto';
-  import {SuccessDto} from './dto/success.dto';
+  import {SuccessDto} from '../shared/dto/success.dto';
   import { diskStorage } from 'multer';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
     private readonly logger = new Logger(UserController.name);
-    constructor( 
-
+    constructor(
         private readonly userService: UserService,
+        private readonly userDB: UserRepository,
       ) {}
 
     @Post('register')
@@ -52,6 +53,10 @@ export class UserController {
     @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
       async updateToken(@Query('email') email: string): Promise<SuccessDto>{      
         return this.userService.updateMail(email);  
+   }
+   @Post('getUser')
+   async getUser( @Body() userid: string): Promise<any>{
+     return await this.userDB.findUserById(userid)
    }
 
    @Post('upload')
