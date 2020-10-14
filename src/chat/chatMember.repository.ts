@@ -32,35 +32,46 @@ export class ChatMemberRepository{
     }
     async getUserChats(id:string):Promise<UserChatsDto[]>{                     
         return await this.chatMemberModel.aggregate(
-            [
-                {
-                  '$match': {
+          [
+            {
+                '$match': {
                     'userId': Types.ObjectId(id)
-                  }
-                }, {
-                  '$lookup': {
+                }
+            }, {
+                '$lookup': {
                     'from': 'chatmembers', 
                     'localField': 'chatId', 
                     'foreignField': 'chatId', 
                     'as': 'members'
-                  }
-                }, {
-                  '$lookup': {
+                }
+            }, {
+                '$lookup': {
+                    'from': 'messages', 
+                    'localField': 'chatId', 
+                    'foreignField': 'chatId', 
+                    'as': 'msg'
+                }
+            }, {
+                '$lookup': {
                     'from': 'profiles', 
                     'localField': 'members.userId', 
                     'foreignField': 'userId', 
                     'as': 'members'
-                  }
-                }, {
-                  '$project': {                   
+                }
+            }, {
+                '$project': {
                     'created_at': 1, 
                     'updated_at': 1, 
                     'members.userId': 1, 
                     'members.firstName': 1, 
-                    'members.isOnline': 1
-                  }
+                    'members.lastName': 1,
+                    'members.isOnline': 1, 
+                    'messages': {
+                        '$size': '$msg'
+                    }
                 }
-              ]
+            }
+        ]
         );
     }
 

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {IsArray, IsString, IsDateString, IsBoolean } from 'class-validator';
+import {IsArray, IsString, IsDateString, IsBoolean, IsInt } from 'class-validator';
 
 export class UserChatsDto { 
     @ApiProperty({
@@ -18,10 +18,15 @@ export class UserChatsDto {
     @IsDateString()    
     updated_at: Date;
     @ApiProperty({
-        format: 'string',
+        format: 'array',
       }) 
     @IsArray()    
-    members: ChatUseDto[]       
+    members: ChatUseDto[]   
+    @ApiProperty({
+      format: 'number',
+    }) 
+    @IsInt()    
+    messages: number;   
 }
 
 class ChatUseDto { 
@@ -39,5 +44,10 @@ class ChatUseDto {
         format: 'string',
           }) 
     @IsString()    
-        firstName: string;      
+        firstName: string;  
+    @ApiProperty({
+        format: 'string',
+            }) 
+    @IsString()    
+        lastName: string;     
 }

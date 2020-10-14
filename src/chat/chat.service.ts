@@ -14,23 +14,23 @@ export class ChatService {
      private readonly messageDB: MessageRepository,
     ) {}
 
-    async createChat(userId:string,staffId:string): Promise<IChat>{
+    async createChat(users:string[]): Promise<IChat>{
         const chat = await this.chatDB.createChat();
-        this.logger.log(`chat id:${chat._id} was created`); 
-        await this.chatMemberDB.createChatMember({
-            userId,
-            chatId:chat._id
-        });
-        await this.chatMemberDB.createChatMember({
-            userId: staffId,
-            chatId:chat._id
-        });
+        this.logger.log(`chat id:${chat._id} was created`);
+        users.forEach(async (user)=>{
+            await this.chatMemberDB.createChatMember({
+                userId:user,
+                chatId:chat._id
+            });
+        })
         return chat;
     }
 
-    async getMessage(chatId:string):Promise<IMessage[] | undefined>{
+  
+
+    // async getMessage(chatId:string):Promise<IMessage[] | undefined>{
        
-        return ;
-    }
+    //     return ;
+    // }
 
 }

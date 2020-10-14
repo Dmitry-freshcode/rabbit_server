@@ -52,7 +52,8 @@ export class MessageRepository{
                 'message': 1, 
                 'created_at': 1, 
                 'updated_at': 1, 
-                'firstName': '$user.firstName'
+                'firstName': '$user.firstName',
+                'lastName': '$user.lastName',
               }
             }
           ]);

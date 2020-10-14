@@ -18,7 +18,7 @@ export const OrderSchema = new Schema({
         ref: 'Category',
         required:true
     },
-    status:{type:String,enum:['done','not performed','performed'],required: true, default:'performed'},
+    status:{type:String,enum:['done','not performed','performed'],required: true, default:'not performed'},
     timeStart: {type: Date,required: true},
     timeEnd: {type: Date,required: true}
 

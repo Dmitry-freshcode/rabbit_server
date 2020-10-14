@@ -30,24 +30,27 @@ export class ChatController {
         private readonly messageDB: MessageRepository,
         private readonly chatMemberDB: ChatMemberRepository,
       ) {}
+      
       @Post('addChat')
       @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
         async addChat(
-            @Body('userId') userId: string,
-            @Body('staffId') staffId: string,             
+            @Body() users: string[],                         
         ): Promise<IChat> {               
-          return this.chatService.createChat(userId,staffId);  
-      }
+          return this.chatService.createChat(users);  
+      } 
+
       @Post('addMessage')
       @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
       async addMessage(@Body() msg: CreateMessageDto ): Promise<IMessage> {                 
         return this.messageDB.createMessage(msg);  
       }
+
       @Get('getUserChats')
       @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
       async getUserChats(@Query('userId') userId: string):Promise<UserChatsDto[]>{       
        return this.chatMemberDB.getUserChats(userId);  
       }
+
       @Get('getChatMsgs')
       @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
       async getChatMsgs(@Query('chatId') chatId: string): Promise<ChatMessageDto[] | undefined> { 

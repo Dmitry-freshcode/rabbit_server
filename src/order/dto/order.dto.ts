@@ -16,12 +16,7 @@ export class CreateOrderDto {
         format: 'string',
       }) 
     @IsString()    
-    categoryId: string;
-    @ApiProperty({
-        format: 'string',
-      }) 
-    @IsString()    
-    status: string;
+    categoryId: string;  
     @ApiProperty({
         format: 'Date',
       }) 
