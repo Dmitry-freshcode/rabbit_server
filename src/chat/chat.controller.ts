@@ -7,7 +7,7 @@ import {
     Get,
     Post,  
   } from '@nestjs/common';
-  import { ApiTags, ApiResponse } from '@nestjs/swagger';
+  import { ApiTags, ApiResponse ,ApiBody } from '@nestjs/swagger';
   import { ChatService } from './chat.service';
   import { ChatRepository } from './chat.repository';
   import { MessageRepository } from './message.repository';
@@ -31,7 +31,8 @@ export class ChatController {
         private readonly chatMemberDB: ChatMemberRepository,
       ) {}
       
-      @Post('addChat')
+      @Post()
+      @ApiBody({type: [String]})  
       @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
         async addChat(
             @Body() users: string[],                         
@@ -39,20 +40,20 @@ export class ChatController {
           return this.chatService.createChat(users);  
       } 
 
-      @Post('addMessage')
-      @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+      @Post('Message')
+      @ApiResponse({ status: 200, description: 'OK', type: CreateMessageDto })
       async addMessage(@Body() msg: CreateMessageDto ): Promise<IMessage> {                 
         return this.messageDB.createMessage(msg);  
       }
 
-      @Get('getUserChats')
-      @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+      @Get('UserChats')
+      @ApiResponse({ status: 200, description: 'OK', type: [UserChatsDto] })
       async getUserChats(@Query('userId') userId: string):Promise<UserChatsDto[]>{       
        return this.chatMemberDB.getUserChats(userId);  
       }
 
-      @Get('getChatMsgs')
-      @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+      @Get('ChatMsgs')
+      @ApiResponse({ status: 200, description: 'OK', type: [ChatMessageDto] })
       async getChatMsgs(@Query('chatId') chatId: string): Promise<ChatMessageDto[] | undefined> { 
        return this.messageDB.getChatMsgs(chatId);  
       }

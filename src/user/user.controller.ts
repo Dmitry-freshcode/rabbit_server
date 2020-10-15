@@ -6,6 +6,7 @@ import {
     UseGuards,       
     Get,
     Post,
+    Patch,
     UseInterceptors, 
     UploadedFiles,
      
@@ -28,7 +29,7 @@ export class UserController {
         private readonly userDB: UserRepository,
       ) {}
 
-    @Post('register')
+    @Post()
     @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
       async addUser(
         @Body() user: CreateUserDto): Promise<SuccessDto> {         
@@ -38,6 +39,22 @@ export class UserController {
     @Post('profile')
     @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
         async addProfile(        
+        @Body() profile: CreateUserProfileDto,        
+          ): Promise<SuccessDto> {        
+          return this.userService.addInfo(profile);  
+    }
+
+    @Patch('profile')
+    @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+        async updateProfile(        
+        @Body() profile: CreateUserProfileDto,        
+          ): Promise<SuccessDto> {        
+          return this.userService.addInfo(profile);  
+    }
+
+    @Post('location')
+    @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+        async addLocation(        
         @Body() profile: CreateUserProfileDto,        
           ): Promise<SuccessDto> {        
           return this.userService.addInfo(profile);  
@@ -54,22 +71,43 @@ export class UserController {
       async updateToken(@Query('email') email: string): Promise<SuccessDto>{      
         return this.userService.updateMail(email);  
    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    @Post('getUser')
    async getUser( @Body() userid: string): Promise<any>{
      return await this.userDB.findUserById(userid)
    }
 
-   @Post('upload')
-   @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './upload',        
-      }),      
-    }),
-  )
-   uploadFile(@UploadedFiles() files) {
-    console.log(files);
-  }
+
+
+
+
+  //  @Post('upload')
+  //  @UseInterceptors(
+  //   FileInterceptor('image', {
+  //     storage: diskStorage({
+  //       destination: './upload',        
+  //     }),      
+  //   }),
+  // )
+  //  uploadFile(@UploadedFiles() files) {
+  //   console.log(files);
+  // }
      
 
 

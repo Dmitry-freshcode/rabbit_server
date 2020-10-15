@@ -1,7 +1,8 @@
 import { IOrder } from './interfaces/order.interface';
 import { Model , Types } from 'mongoose';
 import { CreateOrderDto } from './dto/order.dto';
-import { FindOrdersDto } from './dto/findOrders.dto'
+import { FindOrdersDto } from './dto/findOrders.dto';
+import { DeleteOrderDto } from './dto/orderDelete.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
@@ -27,7 +28,7 @@ export class OrderRepository{
     async find(id:string):Promise<IOrder | undefined>{                     
         return await this.orderModel.findOne({_id:id}).exec();
     }
-    async delete(id:string):Promise<any>{                
+    async delete(id:string):Promise<DeleteOrderDto>{                
         return await this.orderModel.deleteOne({_id:id}).exec();
     }
     async findUserOrders(userId:string,day:Date):Promise<FindOrdersDto[]>{                       

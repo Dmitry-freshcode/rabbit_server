@@ -1,3 +1,5 @@
+import {CreateUserProfileDto} from '../../user/dto/createUserProfile.dto'
+import {CreateUserDto} from '../../user/dto/createUser.dto'
 import { ApiProperty } from '@nestjs/swagger';
 import {IsArray, IsString, IsDateString, IsBoolean, IsInt } from 'class-validator';
 
@@ -21,7 +23,17 @@ export class UserChatsDto {
         format: 'array',
       }) 
     @IsArray()    
-    members: ChatUseDto[]   
+    users: CreateUserDto[];
+    @ApiProperty({
+      format: 'array',
+    }) 
+    @IsArray()    
+    usersProfiles: CreateUserProfileDto[]; 
+    @ApiProperty({
+      format: 'array',
+    }) 
+    @IsArray()    
+    usersImg: UserImgDto[]; 
     @ApiProperty({
       format: 'number',
     }) 
@@ -29,25 +41,20 @@ export class UserChatsDto {
     messages: number;   
 }
 
-class ChatUseDto { 
+class UserImgDto { 
     @ApiProperty({
-        format: 'boolean',
-      }) 
-    @IsBoolean()    
-    isOnline: boolean;
-    @ApiProperty({
-        format: 'string',
+      format: 'string',
       }) 
     @IsString()    
-        userId: string;
+    _id: string;
     @ApiProperty({
-        format: 'string',
-          }) 
+      format: 'string',
+    }) 
     @IsString()    
-        firstName: string;  
+    userId: string;
     @ApiProperty({
-        format: 'string',
-            }) 
+      format: 'string',
+    }) 
     @IsString()    
-        lastName: string;     
+    src: string;        
 }

@@ -8,6 +8,6 @@ export interface IOrder extends Document {
     readonly status: string;
     readonly timeStart: Date,
     readonly timeEnd: Date,
-    readonly createdAt: Date,
-    readonly updatedAt: Date,   
+    readonly createdAt?: Date,
+    readonly updatedAt?: Date,   
 }

@@ -27,4 +27,10 @@ export class CreateOrderDto {
       }) 
     @IsDateString()    
     timeEnd: Date;
+    @ApiProperty({
+      format: 'array',
+    }) 
+    @IsString()    
+    services: string[];
+    
 }

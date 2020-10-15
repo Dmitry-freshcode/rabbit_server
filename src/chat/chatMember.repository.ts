@@ -37,40 +37,53 @@ export class ChatMemberRepository{
                 '$match': {
                     'userId': Types.ObjectId(id)
                 }
-            }, {
+            },  {
                 '$lookup': {
-                    'from': 'chatmembers', 
-                    'localField': 'chatId', 
-                    'foreignField': 'chatId', 
-                    'as': 'members'
+                  'from': 'chatmembers', 
+                  'localField': 'chatId', 
+                  'foreignField': 'chatId', 
+                  'as': 'members'
                 }
-            }, {
+              }, {
                 '$lookup': {
-                    'from': 'messages', 
-                    'localField': 'chatId', 
-                    'foreignField': 'chatId', 
-                    'as': 'msg'
+                  'from': 'users', 
+                  'localField': 'members.userId', 
+                  'foreignField': '_id', 
+                  'as': 'users'
                 }
-            }, {
+              }, {
                 '$lookup': {
-                    'from': 'profiles', 
-                    'localField': 'members.userId', 
-                    'foreignField': 'userId', 
-                    'as': 'members'
+                  'from': 'images', 
+                  'localField': 'users._id', 
+                  'foreignField': 'userId', 
+                  'as': 'usersImg'
                 }
-            }, {
+              }, {
+                '$lookup': {
+                  'from': 'messages', 
+                  'localField': 'chatId', 
+                  'foreignField': 'chatId', 
+                  'as': 'msg'
+                }
+              }, {
+                '$lookup': {
+                  'from': 'profiles', 
+                  'localField': 'members.userId', 
+                  'foreignField': 'userId', 
+                  'as': 'usersProfiles'
+                }
+              }, {
                 '$project': {
-                    'created_at': 1, 
-                    'updated_at': 1, 
-                    'members.userId': 1, 
-                    'members.firstName': 1, 
-                    'members.lastName': 1,
-                    'members.isOnline': 1, 
-                    'messages': {
-                        '$size': '$msg'
-                    }
+                  'created_at': 1, 
+                  'updated_at': 1, 
+                  'users': 1, 
+                  'usersImg': 1, 
+                  'usersProfiles': 1, 
+                  'messages': {
+                    '$size': '$msg'
+                  }
                 }
-            }
+              }
         ]
         );
     }

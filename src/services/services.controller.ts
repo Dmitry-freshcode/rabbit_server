@@ -7,14 +7,17 @@ import {
     Get,
     Post,
     Delete, 
-    Patch,   
+    Patch,    
  } from '@nestjs/common';
- //import { ApiTags, ApiResponse } from '@nestjs/swagger';
+ import { ApiTags, ApiResponse } from '@nestjs/swagger';
  import { ServicesService } from './services.service';
  import { ServiceRepository } from './services.repository';
  import { CreateServiceDto } from './dto/service.dto';
+ import { DeleteServiceDto } from './dto/serviceDelete.dto';
+ import { UpdateServiceDto } from './dto/serviceUpdate.dto';
  import { IService } from './interfaces/services.interface'
 
+@ApiTags('services')
 @Controller('services')
 export class ServicesController {
     private readonly logger = new Logger(ServicesController.name);
@@ -23,22 +26,28 @@ export class ServicesController {
         private readonly servicesDB: ServiceRepository,
       ) {}
 
-    @Post('add')
+    @Post()
+    @ApiResponse({ status: 200, description: 'Service was created', type: CreateServiceDto })
       async addService(
-        @Body() service: CreateServiceDto): Promise<IService> {         
+        @Body() service: CreateServiceDto): Promise<IService> { 
+        this.logger.log(`service ${service.name} was created`);        
         return this.servicesDB.createService(service);  
     }
-    @Delete('delete')
+    @Delete()
+    @ApiResponse({ status: 200, description: 'Service was deleted', type: DeleteServiceDto })
     async deleteService(
-        @Body() id: string): Promise<any> {         
+        @Body('id') id: string): Promise<DeleteServiceDto> {        
+        this.logger.log(`service ${id} was deleted`);      
         return this.servicesDB.delete(id);  
     }
-    @Patch('update')
+    @Patch()
+    @ApiResponse({ status: 200, description: 'Service was updated', type: UpdateServiceDto })
     async updateService(
-        @Body() service: IService): Promise<any> {         
+        @Body() service: IService): Promise<UpdateServiceDto> { 
+        this.logger.log(`service ${service.name} was updated`);        
         return this.servicesDB.updateService(service);  
     }
-    @Get('find')
+    @Get()
     async findService(
         @Query('id') id: string): Promise<IService | undefined> {         
         return this.servicesDB.find(id);  

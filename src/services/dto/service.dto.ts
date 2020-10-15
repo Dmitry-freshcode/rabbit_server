@@ -11,5 +11,10 @@ export class CreateServiceDto {
         format: 'string',
       }) 
     @IsString()
-    imageSrc: string;  
+    imageSrc: string; 
+    @ApiProperty({
+      format: 'string',
+    }) 
+    @IsString()
+    categoryId: string;
 }

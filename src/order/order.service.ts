@@ -14,12 +14,12 @@ export class OrderService {
      
     ) {}
 
-    async createOrder(orderDto: CreateOrderDto,services: string[]):Promise<IOrder>{
+    async createOrder(orderDto: CreateOrderDto):Promise<IOrder>{
         if(this.validateDate(orderDto.timeStart,orderDto.timeEnd)){
             throw new HttpException('Start time must be less than end time', HttpStatus.CONFLICT);
         }
         const order = await this.orderDB.createOrder(orderDto);        
-        services.forEach(async (serviceId:string):Promise<void>=>{
+        orderDto.services.forEach(async (serviceId:string):Promise<void>=>{
             await this.orderServiceDB.createOrderService({
                 serviceId,
                 orderId:order._id
@@ -36,7 +36,6 @@ export class OrderService {
         }
         return await this.orderDB.findAll({staffId:staffId});;
     }
-
     validateDate (startDate : Date,endDate: Date):boolean{
         return moment(startDate).isAfter(endDate);
     }
