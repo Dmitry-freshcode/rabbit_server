@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
 
-export class UpdateOrderDto { 
+export class UpdateDto { 
     @ApiProperty({
         format: 'number',
       }) 

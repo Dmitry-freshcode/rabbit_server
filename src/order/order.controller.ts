@@ -6,7 +6,7 @@ import {
     UseGuards,       
     Get,
     Post,
-    Patch,
+    Put,
     Delete,     
   } from '@nestjs/common';
   import { ApiTags, ApiResponse , ApiBody } from '@nestjs/swagger';
@@ -14,9 +14,10 @@ import {
   import { OrderService } from './order.service';
   import { OrderRepository } from './order.repository'
   import {CreateOrderDto} from './dto/order.dto';
-  import { UpdateOrderDto } from './dto/updateOrder.dto';
-  import { DeleteOrderDto } from './dto/orderDelete.dto';
   import { FindOrdersDto } from './dto/findOrders.dto';
+  import { FindOrderDto } from './dto/findOrder.dto';
+  import { DeleteDto } from '../shared/dto/delete.dto';
+  import { UpdateDto } from '../shared/dto/update.dto';
   import {SuccessDto} from '../shared/dto/success.dto';
 @ApiTags('order')
 @Controller('order')
@@ -36,10 +37,10 @@ export class OrderController {
       } 
       @Delete()
       @ApiBody({type: String})      
-      @ApiResponse({ status: 200, description: 'Order was delete', type: DeleteOrderDto })
-        async findOrder(
+      @ApiResponse({ status: 200, description: 'Order was delete', type: DeleteDto })
+        async deleteOrder(
             @Body('orderId') orderId:string,                
-        ): Promise<DeleteOrderDto> {  
+        ): Promise<DeleteDto> {  
           this.logger.log(`order ${orderId} was deleted`);               
           return await this.orderDB.delete(orderId);
       }   
@@ -62,12 +63,18 @@ export class OrderController {
           return this.orderDB.findStaffOrders(staffId,day);  
       }
 
-      @Patch() 
+      @Get()
+      @ApiResponse({ status: 200, description: 'OK', type: [FindOrderDto] })     
+        async findOrder(@Query('orderId') orderId:string):Promise<FindOrderDto[]> {       
+          return this.orderDB.findOrder(orderId);  
+      }
+
+      @Put() 
       @ApiBody({type: String})       
-      @ApiResponse({ status: 200, description: 'The order has been successfully updated.', type: UpdateOrderDto })
+      @ApiResponse({ status: 200, description: 'The order has been successfully updated.', type: UpdateDto })
         async updateOrder(
             @Body() order: IOrder,                         
-        ): Promise<UpdateOrderDto> {   
+        ): Promise<UpdateDto> {   
           this.logger.log(`order ${order._id} was updated`);               
           return this.orderDB.updateOrder(order);  
       } 

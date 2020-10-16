@@ -1,7 +1,9 @@
 import { IChatMember } from './interfaces/chatMember.interface';
 import { Model , Types} from 'mongoose';
 import { CreateChatMemberDto } from './dto/chatMember.dto';
-import { UserChatsDto } from './dto/userChats.dto'
+import { UserChatsDto } from './dto/userChats.dto';
+import { DeleteDto } from '../shared/dto/delete.dto';
+import { UpdateDto } from '../shared/dto/update.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -21,13 +23,13 @@ export class ChatMemberRepository{
         const chatMember = new this.chatMemberModel(ChatMember);
         return await chatMember.save();
     }
-    async updateChatMember(ChatMember:IChatMember):Promise<any>{  
+    async updateChatMember(ChatMember:IChatMember):Promise<UpdateDto>{  
         return await this.chatMemberModel.updateOne({_id:ChatMember._id},ChatMember);
     }
     async find(id:string):Promise<IChatMember | undefined>{                     
         return await this.chatMemberModel.findOne({_id:id}).exec();
     }
-    async delete(id:string):Promise<any>{                
+    async delete(id:string):Promise<DeleteDto>{                
         return await this.chatMemberModel.deleteOne({_id:id}).exec();
     }
     async getUserChats(id:string):Promise<UserChatsDto[]>{                     

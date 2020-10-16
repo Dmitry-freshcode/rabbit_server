@@ -1,6 +1,7 @@
 import { IChat} from './interfaces/chat.interface';
 import { Model } from 'mongoose';
-import { IMessage} from './interfaces/message.interface'
+import { DeleteDto } from '../shared/dto/delete.dto';
+import { UpdateDto } from '../shared/dto/update.dto';
 //import { CreateChatDto } from './dto/chats.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -22,13 +23,13 @@ export class ChatRepository{
         const chat = new this.chatModel();
         return await chat.save();
     }
-    async updateChat(Chat:IChat):Promise<any>{  
+    async updateChat(Chat:IChat):Promise<UpdateDto>{  
         return await this.chatModel.updateOne({_id:Chat._id},Chat);
     }
     // async find(id:string):Promise<IChat | undefined>{                     
     //     return await this.chatModel.findOne({_id:id}).exec();
     // }
-    async delete(id:string):Promise<any>{                
+    async delete(id:string):Promise<DeleteDto>{                
         return await this.chatModel.deleteOne({_id:id}).exec();
     }
     

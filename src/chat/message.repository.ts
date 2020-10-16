@@ -1,6 +1,8 @@
 import { IMessage } from './interfaces/message.interface';
 import { Model , Types } from 'mongoose';
 import { CreateMessageDto } from './dto/message.dto';
+import { DeleteDto } from '../shared/dto/delete.dto';
+import { UpdateDto } from '../shared/dto/update.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ChatMessageDto } from './dto/chatMessage.dto'
@@ -21,13 +23,13 @@ export class MessageRepository{
         const message = new this.messageModel(Message);
         return await message.save();
     }
-    async updateMessage(Message:IMessage):Promise<any>{  
+    async updateMessage(Message:IMessage):Promise<UpdateDto>{  
         return await this.messageModel.updateOne({_id:Message._id},Message);
     }
     // async find(id:string):Promise<IMessage | undefined>{                     
     //     return await this.messageModel.findOne({_id:id}).exec();
     // }
-    async delete(id:string):Promise<any>{                
+    async delete(id:string):Promise<DeleteDto>{                
         return await this.messageModel.deleteOne({_id:id}).exec();
     }
     async getChatMsgs(id:string):Promise<ChatMessageDto[]>{                           

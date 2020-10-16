@@ -7,7 +7,7 @@ import {
     Get,
     Post,
     Delete, 
-    Patch,    
+    Put,    
  } from '@nestjs/common';
  import { ApiTags, ApiResponse } from '@nestjs/swagger';
  import { ServicesService } from './services.service';
@@ -40,7 +40,7 @@ export class ServicesController {
         this.logger.log(`service ${id} was deleted`);      
         return this.servicesDB.delete(id);  
     }
-    @Patch()
+    @Put()
     @ApiResponse({ status: 200, description: 'Service was updated', type: UpdateServiceDto })
     async updateService(
         @Body() service: IService): Promise<UpdateServiceDto> { 

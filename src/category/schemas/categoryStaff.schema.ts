@@ -1,9 +1,9 @@
 import { Schema } from 'mongoose';
 
 export const CategoryStaffSchema = new Schema({
-    serviceId: {
+    categoryId: {
         type: Schema.Types.ObjectId,
-        ref: 'Service',
+        ref: 'Category',
         required:true
     }, 
     staffId: {

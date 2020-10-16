@@ -7,14 +7,18 @@ import {
     Body,
     Post,
     Delete,
-    Patch    
+    Put    
  } from '@nestjs/common';
  import { ApiTags, ApiResponse } from '@nestjs/swagger';
  import { CategoryRepository } from './category.repository';
+ import { CategoryStaffRepository } from './categoryStaff.repository'
  import { CreateCategoryDto } from './dto/category.dto';
- import { UpdateCategoryDto } from './dto/categoryUpdate.dto';
- import { DeleteCategoryDto } from './dto/categoryDelete.dto'; 
- import { ICategory } from './interfaces/category.interface'
+ import { CreateCategoryStaffDto } from './dto/categoryStaff.dto';
+ import { DeleteDto } from '../shared/dto/delete.dto';
+ import { UpdateDto } from '../shared/dto/update.dto';
+ import { ICategory } from './interfaces/category.interface';
+ import { ICategoryStaff } from './interfaces/categoryStaff.interface';
+ import {SuccessDto} from '../shared/dto/success.dto';
 
 @ApiTags('category')
 @Controller('category')
@@ -22,6 +26,7 @@ export class CategoryController {
     private readonly logger = new Logger(CategoryController.name);
     constructor(        
         private readonly categoryDB: CategoryRepository,
+        private readonly categoryStaffDB: CategoryStaffRepository,
       ) {}
       @Post()
       @ApiResponse({ status: 200, description: 'Service was created', type: CreateCategoryDto })
@@ -30,17 +35,37 @@ export class CategoryController {
           this.logger.log(`category ${category.name} was created`);        
           return this.categoryDB.createCategory(category);  
       }
+      @Post('staffCategory')
+      @ApiResponse({ status: 200, description: 'Service was created', type: CreateCategoryDto })
+        async addStaffCategory(
+          @Body() data: CreateCategoryStaffDto): Promise<SuccessDto> { 
+          this.logger.log(`category for staff: ${data.staffId} was created`);        
+          return this.categoryStaffDB.createCategoryStaff(data);  
+      }
+      @Get('staffCategory')
+      @ApiResponse({ status: 200, description: 'Service was created', type: [CreateCategoryStaffDto] })
+        async getStaffCategory(
+          @Query('id') id: string): Promise<ICategoryStaff[]> {                  
+          return this.categoryStaffDB.findStaffCategories(id);  
+      }
+      @Put('staffCategory')
+      @ApiResponse({ status: 200, description: 'Service was created', type: CreateCategoryDto })
+        async updateStaffCategory(
+          @Body() data: ICategoryStaff): Promise<UpdateDto> { 
+          this.logger.log(`category for staff: ${data.staffId} was updated`);        
+          return this.categoryStaffDB.updateCategoryStaff(data);  
+      }
       @Delete()
-      @ApiResponse({ status: 200, description: 'Category was deleted', type: DeleteCategoryDto })
+      @ApiResponse({ status: 200, description: 'Category was deleted', type: DeleteDto })
       async deleteService(
-          @Body('id') id: string): Promise<DeleteCategoryDto> {        
+          @Body('id') id: string): Promise<DeleteDto> {        
           this.logger.log(`category ${id} was deleted`);      
           return this.categoryDB.delete(id);  
       }
-      @Patch()
-      @ApiResponse({ status: 200, description: 'Category was updated', type: UpdateCategoryDto })
+      @Put()
+      @ApiResponse({ status: 200, description: 'Category was updated', type: UpdateDto })
       async updateService(
-          @Body() category: ICategory): Promise<UpdateCategoryDto> { 
+          @Body() category: ICategory): Promise<UpdateDto> { 
           this.logger.log(`category ${category.name} was updated`);        
           return this.categoryDB.updateCategory(category);  
       }
