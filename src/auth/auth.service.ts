@@ -11,23 +11,24 @@ export class AuthService {
         private usersDB: UserRepository,        
         //private readonly tokenService: TokenService,
     ) { }
-    async validateUser(data:LoginUserDto): Promise<boolean> {                
-        const user = await this.usersDB.findUserByEmail(data.username);    
+    async validateUser(email:string,password:string): Promise<boolean> {  
+        const user = await this.usersDB.findUserByEmail(email);
         if(user) {
-          const compare = await bcrypt.compare(data.password, user.password);                  
+          const compare = await bcrypt.compare(password, user.password);                          
           return compare;
         }                
         return null;        
       }
 
-    async login(data:LoginUserDto):Promise<any> {    
-        const isExist =  await this.validateUser(data);        
+    async login(data:LoginUserDto):Promise<any> {       
+        const isExist =  await this.validateUser(data.email,data.password);                        
         if (isExist) {
-          const user = await this.usersDB.findUserByEmail(data.username);
-            const payload = { email: data.username };           
+          const user = await this.usersDB.findUserByEmail(data.email);
+            const payload = { email: data.email, role: user.role };
+            const token = this.jwtService.sign(payload, {secret : `${process.env.JWT_SECRET}`});
             return {
-                  access_token: this.jwtService.sign(payload, {secret : process.env.SECRET}),
-                  email: data.username,
+                  access_token: token,
+                  email: data.email,
                   role: user.role,
                 };    
         }     

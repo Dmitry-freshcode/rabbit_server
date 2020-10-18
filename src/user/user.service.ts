@@ -6,10 +6,13 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
 import { SuccessDto } from '../shared/dto/success.dto';
 import { IUser } from './interfaces/user.interface';
+import { IUserProfile } from './interfaces/userProfile.interface';
 import * as nodemailer from 'nodemailer';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class UserService {
@@ -50,10 +53,10 @@ export class UserService {
     });
     this.sendMail(token, user);
   }
-
+  Ш;
   async updateMail(email: string): Promise<SuccessDto> {
-    const user = await this.userDB.findUserByEmail(email);
-    if (user.status === 'notConfirmed') {
+    const user = await this.userDB.findUserByEmail(email);    
+    if (user.status === 'created') {
       await this.sendConfirmation(user);
       return { success: true };
     }
@@ -68,7 +71,7 @@ export class UserService {
     const user = await this.userDB.findUserById(decoded['_id']);
     const isProfile = await this.profileDB.findProfileByUserId(decoded['_id']);
     if (
-      user.status === 'notConfirmed' &&
+      user.status === 'created' &&
       moment(new Date(decoded['exp'] * 1000)).isAfter(Date.now())
     ) {
       this.logger.log(`confirm ${user.email} user`);
@@ -86,7 +89,7 @@ export class UserService {
     };
   }
 
-  async addInfo(profile: CreateUserProfileDto): Promise<SuccessDto> {
+  async addInfo(profile: CreateUserProfileDto): Promise<CreateUserProfileDto> {
     const user = await this.userDB.findUserById(profile.userId);
     const findProfile = await this.profileDB.findProfileByUserId(user._id);
     if (findProfile) {
@@ -95,10 +98,10 @@ export class UserService {
         HttpStatus.CONFLICT,
       );
     }
-    await this.profileDB.createProfile(profile);
+    const newProfile = await this.profileDB.createProfile(profile);
     await this.userDB.updateStatus(profile.userId, 'Confirmed');
     this.logger.log(`add profile for ${user.email}`);
-    return { success: true };
+    return newProfile;
   }
 
   async sendMail(token: string, user: IUser): Promise<void> {
@@ -120,7 +123,14 @@ export class UserService {
     this.logger.log(`send confirmation email to ${user.email}`);
   }
 
-  async nearStaff(category: string, lat: string, lng: string): Promise<any> {
-    return;
+  async renameFile(file,data):Promise<void>{
+    console.log(file);
+   const name = path.extname(file.filename);
+   fs.rename(file.path,`./upload/${data.id}${name}`,(err) => {
+    if (err) throw err;   
+  })
+   console.log(name);
+  return
   }
+
 }

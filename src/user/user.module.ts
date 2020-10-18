@@ -14,19 +14,20 @@ import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    //JwtService,
+    ConfigModule.forRoot(),    
     MongooseModule.forFeature([
       {name: 'User', schema: UserSchema},
       {name: 'Profile', schema: ProfileSchema},
       {name: 'Location', schema: LocationSchema},      
     ]),
+    
     JwtModule.register({
       secret: process.env.SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRE },
     }),
+    
     MulterModule.register({
-      dest: '/upload',
+      dest: './uploads',
     }),
     
   ],
@@ -36,7 +37,6 @@ import { MulterModule } from '@nestjs/platform-express';
     UserRepository,
     ProfileRepository,
     LocationRepository,
-   // JwtService
   ],
   exports: [UserRepository,LocationRepository],
 })

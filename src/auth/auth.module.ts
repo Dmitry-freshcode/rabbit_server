@@ -7,20 +7,30 @@ import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import {UserModule} from '../user/user.module'
 import { ConfigModule } from '@nestjs/config';
+import { RolesGuard } from './roles.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [  
-    ConfigModule.forRoot(),  
-    //JwtStrategy,
+    ConfigModule.forRoot(),    
     UserModule,       
-    PassportModule,      
+    PassportModule,         
     JwtModule.register({
       secret: process.env.SECRET,
       signOptions: { expiresIn: '1d' },
+      
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy,LocalStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    LocalStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
   exports: [AuthService]
 })
 export class AuthModule {}

@@ -4,6 +4,7 @@ import { CreateLocationDto } from './dto/location.dto';
 //import { FindOrdersDto } from './dto/findOrders.dto';
 import { DeleteDto } from '../shared/dto/delete.dto';
 import { UpdateDto } from '../shared/dto/update.dto';
+import { NearDto } from './dto/near.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -18,7 +19,6 @@ export class LocationRepository {
     return await this.locationModel.find(query).exec();
   }
   async createLocation(Location: CreateLocationDto): Promise<ILocation> {
-    console.log(Location);
     const location = new this.locationModel({
       userId: Location.userId,
       loc: {
@@ -28,7 +28,7 @@ export class LocationRepository {
     });
     return await location.save();
   }
-  async updateLocation(Location: ILocation): Promise<ILocation> {
+  async updateLocation(Location: ILocation): Promise<UpdateDto> {
     return await this.locationModel.updateOne({ _id: Location._id }, Location);
   }
   async find(id: string): Promise<ILocation | undefined> {
@@ -43,9 +43,9 @@ export class LocationRepository {
 
   async nearStaff(
     category: string,
-    lat: string,
-    lng: string,
-  ): Promise<any | undefined> {     
+    lat: number,
+    lng: number,
+  ): Promise<NearDto[] | undefined> {
     return await this.locationModel.aggregate([
       {
         $geoNear: {
@@ -53,9 +53,22 @@ export class LocationRepository {
             type: 'Point',
             coordinates: [lat, lng],
           },
-          distanceField: 'loc.coordinates._id',
-          maxDistance: 5000
-        }
+          distanceField: 'loc.distance',
+          maxDistance: 10000,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      {
+        $match: {
+          'user.role': 'staff',
+        },
       },
       {
         $lookup: {
@@ -66,9 +79,26 @@ export class LocationRepository {
         },
       },
       {
-        $match: {
-          'category._id': Types.ObjectId(category),
+        $lookup: {
+          from: 'profiles',
+          localField: 'user._id',
+          foreignField: 'userId',
+          as: 'profile',
         },
+      },
+      {
+        $match: {
+          'category.categoryId': Types.ObjectId(category),
+        },
+      },
+      {
+        $project: {
+          loc: 1,
+          profile: 1,
+        },
+      },
+      {
+        $unwind: '$profile',
       },
     ]);
   }

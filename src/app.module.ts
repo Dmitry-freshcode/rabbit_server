@@ -27,11 +27,14 @@ import { ChatModule } from './chat/chat.module';
     ServicesModule,
     CategoryModule,
     OrderModule,
-    ChatModule   
+    ChatModule,   
+    
   ],
   controllers: [AppController],
   providers: [
     AuthModule,
-    AppService],
+    AppService,
+    ],
+    
 })
 export class AppModule {}

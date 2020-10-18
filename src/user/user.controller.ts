@@ -8,7 +8,7 @@ import {
   Post,
   Put,
   UseInterceptors,
-  UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
@@ -17,11 +17,17 @@ import { UserRepository } from './user.repository';
 import { LocationRepository } from './location.repository';
 import { ProfileRepository } from './profile.repository';
 import { ILocation } from './interfaces/location.interface';
+import { IUserProfile } from './interfaces/userProfile.interface';
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
 import { CreateLocationDto } from './dto/location.dto';
+import { NearDto } from './dto/near.dto';
+import { DeleteDto } from '../shared/dto/delete.dto';
+import { UpdateDto } from '../shared/dto/update.dto';
 import { SuccessDto } from '../shared/dto/success.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { diskStorage } from 'multer';
+import {Roles} from '../auth/roles.decorator'
 
 @ApiTags('user')
 @Controller('user')
@@ -40,51 +46,60 @@ export class UserController {
     return this.userService.register(user);
   }
 
+  
   @Post('profile')
-  @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async addProfile(@Body() profile: CreateUserProfileDto): Promise<SuccessDto> {
+  @ApiResponse({ status: 200, description: 'OK', type: CreateUserProfileDto })
+  async addProfile(
+    @Body() profile: CreateUserProfileDto,
+  ): Promise<CreateUserProfileDto> {
     return this.userService.addInfo(profile);
   }
-
+ 
+  //@Roles(['admin'])
   @Get('profile')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
-  async getProfile(@Query('userId') userId: string): Promise<any> {
+  async getProfile(@Query('userId') userId: string): Promise<any> {   
     return this.profileDB.findProfileByUserId(userId);
   }
 
+  
   @Put('profile')
-  @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async updateProfile(
-    @Body() profile: CreateUserProfileDto,
-  ): Promise<SuccessDto> {
-    return this.userService.addInfo(profile);
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 200, description: 'OK', type: UpdateDto })
+  async updateProfile(@Body() profile: IUserProfile): Promise<UpdateDto> {
+    return this.profileDB.updateProfile(profile);
   }
 
   @Post('location')
-  @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
   async addLocation(@Body() data: CreateLocationDto): Promise<ILocation> {
     return this.locationDB.createLocation(data);
   }
 
   @Get('location')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
   async getLocation(@Query('userId') userId: string): Promise<ILocation> {
     return this.locationDB.getLocation(userId);
   }
 
   @Put('location')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
-  async updateLocation(@Body() data: ILocation): Promise<ILocation> {
+  async updateLocation(@Body() data: ILocation): Promise<UpdateDto> {
     return this.locationDB.updateLocation(data);
   }
 
   @Get('near')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
   async nearStaff(
     @Query('category') category: string,
-    @Query('lat') lat: string,
-    @Query('lng') lng: string,
-  ): Promise<any> {
+    @Query('lat') lat: number,
+    @Query('lng') lng: number,
+  ): Promise<NearDto[]> {
     return this.locationDB.nearStaff(category, lat, lng);
   }
 
@@ -96,24 +111,32 @@ export class UserController {
 
   @Get('updateToken')
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async updateToken(@Query('email') email: string): Promise<SuccessDto> {
+  async updateToken(@Query('email') email: string): Promise<SuccessDto> {    
     return this.userService.updateMail(email);
   }
 
   @Post('getUser')
+  @UseGuards(JwtAuthGuard)
   async getUser(@Body() userid: string): Promise<any> {
     return await this.userDB.findUserById(userid);
   }
 
-  //  @Post('upload')
-  //  @UseInterceptors(
-  //   FileInterceptor('image', {
-  //     storage: diskStorage({
-  //       destination: './upload',
-  //     }),
-  //   }),
-  // )
-  //  uploadFile(@UploadedFiles() files) {
-  //   console.log(files);
-  // }
+   @Post('upload')
+   @UseInterceptors(
+    FileInterceptor('image',{storage:  diskStorage({
+      destination: "./uploads",
+      filename: (req, file, callback) => {  
+        console.log(file)     
+        callback(null, file.fieldname + '-' + Date.now());
+      }
+    })
+  }
+  
+    ),
+  )
+   uploadFile(@UploadedFile() file, @Body() data):any{
+    
+    this.userService.renameFile(file,data);
+    return file;
+  }
 }
