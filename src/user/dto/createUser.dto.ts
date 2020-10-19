@@ -12,10 +12,15 @@ export class CreateUserDto {
         format: 'string',
       }) 
     @IsString()
-    password: string;
+    password?: string;
     @ApiProperty({
       format: 'string',
     }) 
     @IsString()
-      role: string;
+      role?: string; 
+    @ApiProperty({
+      format: 'string',
+    }) 
+    @IsString()
+    strategy: string;       
 }

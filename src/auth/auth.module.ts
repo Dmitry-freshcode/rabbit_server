@@ -3,18 +3,23 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
-import { LocalStrategy } from './local.strategy';
+import { JwtStrategy } from './strategy/jwt.strategy';
+import { LocalStrategy } from './strategy/local.strategy';
+import { GoogleStrategy } from './strategy/google.strategy'
 import {UserModule} from '../user/user.module'
 import { ConfigModule } from '@nestjs/config';
-import { RolesGuard } from './roles.guard';
+import { RolesGuard } from './role/roles.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { UserService } from '../user/user.service'
+
+
 
 @Module({
   imports: [  
     ConfigModule.forRoot(),    
     UserModule,       
-    PassportModule,         
+    PassportModule,
+    //UserService,         
     JwtModule.register({
       secret: process.env.SECRET,
       signOptions: { expiresIn: '1d' },
@@ -26,6 +31,8 @@ import { APP_GUARD } from '@nestjs/core';
     AuthService,
     JwtStrategy,
     LocalStrategy,
+    GoogleStrategy,
+    //UserService,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

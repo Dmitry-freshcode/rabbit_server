@@ -4,6 +4,7 @@ import { UserRepository } from './user.repository';
 import { ProfileRepository } from './profile.repository';
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { SuccessDto } from '../shared/dto/success.dto';
 import { IUser } from './interfaces/user.interface';
 import { IUserProfile } from './interfaces/userProfile.interface';
@@ -25,15 +26,18 @@ export class UserService {
 
   async register(createUser: CreateUserDto): Promise<SuccessDto> {
     const userByEmail = await this.userDB.findUserByEmail(createUser.email);
-    if (userByEmail && userByEmail.role === createUser.role) {
+    if (userByEmail) {
       throw new HttpException(
         'User with this email address already exists',
         HttpStatus.CONFLICT,
       );
     }
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hash = await bcrypt.hash(createUser.password, salt);
+    let hash='';
+    if(createUser.password) {
+      const saltRounds = 10;
+      const salt = await bcrypt.genSalt(saltRounds);
+      hash = await bcrypt.hash(createUser.password, salt);
+    }    
     const user = _.assign(createUser, { password: hash });
     const newUser = await this.userDB.createUser(user);
     this.sendConfirmation(newUser);
@@ -89,7 +93,7 @@ export class UserService {
     };
   }
 
-  async addInfo(profile: CreateUserProfileDto): Promise<CreateUserProfileDto> {
+  async addInfo(profile: ProfileDto,filename:string): Promise<CreateUserProfileDto> {
     const user = await this.userDB.findUserById(profile.userId);
     const findProfile = await this.profileDB.findProfileByUserId(user._id);
     if (findProfile) {
@@ -98,8 +102,10 @@ export class UserService {
         HttpStatus.CONFLICT,
       );
     }
-    const newProfile = await this.profileDB.createProfile(profile);
-    await this.userDB.updateStatus(profile.userId, 'Confirmed');
+    const userAvatar = path.join( process.env.APP_URL, 'user/image/'+filename);
+    const creatProfile = {...profile, userAvatar};  
+    const newProfile = await this.profileDB.createProfile(creatProfile);
+    await this.userDB.updateStatus(profile.userId, 'confirmed');
     this.logger.log(`add profile for ${user.email}`);
     return newProfile;
   }
@@ -118,7 +124,7 @@ export class UserService {
       to: `${user.email}`, // list of receivers
       subject: 'Сomplete registration', // Subject line
       text: 'Сomplete registration', // plain text body
-      html: `Сomplete registration by clicking on the link : </br>${process.env.FRONT_URL}/confirm/${token}`, // html body
+      html: `Сomplete registration by clicking on the link : </br>${process.env.APP_URL}/user/confirmUser?token=${token}`, // html body
     });
     this.logger.log(`send confirmation email to ${user.email}`);
   }

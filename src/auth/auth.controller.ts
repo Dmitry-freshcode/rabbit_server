@@ -1,11 +1,12 @@
-import { Controller, UseGuards, Post,Body, Request,Get,Query} from '@nestjs/common';
+import { Controller, UseGuards, Post,Body,Get,Req} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './local-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LoginUserDto } from './dto/loginUser.dto';
-import { JwtAuthGuard} from './jwt-auth.guard';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { from } from 'rxjs';
 
+
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController { 
     constructor(
@@ -15,10 +16,18 @@ export class AuthController {
       @UseGuards(LocalAuthGuard)
       async login(@Body() loginUser:LoginUserDto) {                    
         return this.authService.login(loginUser);
+      }  
+
+      @Get('google')
+      @UseGuards(AuthGuard('google'))
+      async googleAuth(@Req() req) {}
+
+
+      @Get('google/redirect')
+      @UseGuards(AuthGuard('google'))
+      async googleAuthRedirect(@Req() req) {        
+       return this.authService.googleCreatLogin(req.user.accessToken);
       }
-      @Get('test') 
-      @UseGuards(AuthGuard('jwt'))
-      async test(@Query('userId') loginUser) {                
-        return loginUser;
-      }
+
+      
 }

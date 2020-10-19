@@ -2,7 +2,7 @@ import {
   Controller,
   Logger,
   Query,
-  //UseGuards,
+  UseGuards,
   Get,
   Body,
   Post,
@@ -19,8 +19,11 @@ import { UpdateDto } from '../shared/dto/update.dto';
 import { ICategory } from './interfaces/category.interface';
 import { ICategoryStaff } from './interfaces/categoryStaff.interface';
 import { SuccessDto } from '../shared/dto/success.dto';
+import { Roles } from '../auth/role/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('category')
+@UseGuards(JwtAuthGuard)
 @Controller('category')
 export class CategoryController {
   private readonly logger = new Logger(CategoryController.name);
@@ -28,16 +31,19 @@ export class CategoryController {
     private readonly categoryDB: CategoryRepository,
     private readonly categoryStaffDB: CategoryStaffRepository,
   ) {}
+
+  @Roles(['admin'])
   @Post()
   @ApiResponse({
     status: 200,
-    description: 'Service was created',
+    description: 'Category was created',
     type: CreateCategoryDto,
   })
   async addCategory(@Body() category: CreateCategoryDto): Promise<ICategory> {
     this.logger.log(`category ${category.name} was created`);
     return this.categoryDB.createCategory(category);
   }
+  @Roles(['admin'])
   @Post('staffCategory')
   @ApiResponse({
     status: 200,
@@ -50,6 +56,7 @@ export class CategoryController {
     this.logger.log(`category for staff: ${data.staffId} was created`);
     return this.categoryStaffDB.createCategoryStaff(data);
   }
+
   @Get('staffCategory')
   @ApiResponse({
     status: 200,
@@ -59,16 +66,20 @@ export class CategoryController {
   async getStaffCategory(@Query('id') id: string): Promise<ICategoryStaff[]> {
     return this.categoryStaffDB.findStaffCategories(id);
   }
+
+  @Roles(['admin'])
   @Put('staffCategory')
   @ApiResponse({
     status: 200,
-    description: 'Service was created',
+    description: 'Category was updated',
     type: CreateCategoryDto,
   })
   async updateStaffCategory(@Body() data: ICategoryStaff): Promise<UpdateDto> {
     this.logger.log(`category for staff: ${data.staffId} was updated`);
     return this.categoryStaffDB.updateCategoryStaff(data);
   }
+
+  @Roles(['admin'])
   @Delete()
   @ApiResponse({
     status: 200,
@@ -79,6 +90,8 @@ export class CategoryController {
     this.logger.log(`category ${id} was deleted`);
     return this.categoryDB.delete(id);
   }
+
+  @Roles(['admin'])
   @Put()
   @ApiResponse({
     status: 200,
@@ -89,10 +102,12 @@ export class CategoryController {
     this.logger.log(`category ${category.name} was updated`);
     return this.categoryDB.updateCategory(category);
   }
+
   @Get()
   async findCategory(@Query('id') id: string): Promise<ICategory | undefined> {
     return this.categoryDB.find(id);
   }
+
   @Get('findAll')
   async findAllCategories(): Promise<ICategory[] | undefined> {
     return this.categoryDB.findAll();

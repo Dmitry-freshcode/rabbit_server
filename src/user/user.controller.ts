@@ -9,6 +9,11 @@ import {
   Put,
   UseInterceptors,
   UploadedFile,
+  Res,
+  Param,
+  Req,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
@@ -19,15 +24,16 @@ import { ProfileRepository } from './profile.repository';
 import { ILocation } from './interfaces/location.interface';
 import { IUserProfile } from './interfaces/userProfile.interface';
 import { CreateUserDto } from './dto/createUser.dto';
-import { CreateUserProfileDto } from './dto/createUserProfile.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { CreateLocationDto } from './dto/location.dto';
 import { NearDto } from './dto/near.dto';
 import { DeleteDto } from '../shared/dto/delete.dto';
 import { UpdateDto } from '../shared/dto/update.dto';
 import { SuccessDto } from '../shared/dto/success.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
-import {Roles} from '../auth/roles.decorator'
+import { Roles } from '../auth/role/roles.decorator';
+import * as path from 'path';
 
 @ApiTags('user')
 @Controller('user')
@@ -46,24 +52,51 @@ export class UserController {
     return this.userService.register(user);
   }
 
-  
   @Post('profile')
-  @ApiResponse({ status: 200, description: 'OK', type: CreateUserProfileDto })
-  async addProfile(
-    @Body() profile: CreateUserProfileDto,
-  ): Promise<CreateUserProfileDto> {
-    return this.userService.addInfo(profile);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profileimages',
+        filename: (req, file, cb) => {
+          const filename: string = Date.now().toString();
+          const extension: string = path.parse(file.originalname).ext;
+          cb(null, `${filename}${extension}`);
+        },        
+      }),
+      fileFilter:  (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+          cb(null, true);
+        } else { 
+          req.fileValidationError = 'goes wrong on the mimetype';
+          cb(null,false);
+        }
+      }, 
+    }),
+  )
+  uploadFile(
+    @UploadedFile() file,
+    @Body() profile: ProfileDto,
+    @Req() req
+  ): Promise<any>{    
+    if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
+    return this.userService.addInfo(profile, file.filename);
   }
- 
+
+  @Get('image/:imagename')
+  findProfileImage(@Param('imagename') imagename, @Res() res) {
+    return res.sendFile(
+      path.join(process.cwd(), 'uploads/profileimages/' + imagename),
+    );
+  }
+
   //@Roles(['admin'])
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
-  async getProfile(@Query('userId') userId: string): Promise<any> {   
+  async getProfile(@Query('userId') userId: string): Promise<any> {
     return this.profileDB.findProfileByUserId(userId);
   }
 
-  
   @Put('profile')
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: UpdateDto })
@@ -111,7 +144,7 @@ export class UserController {
 
   @Get('updateToken')
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async updateToken(@Query('email') email: string): Promise<SuccessDto> {    
+  async updateToken(@Query('email') email: string): Promise<SuccessDto> {
     return this.userService.updateMail(email);
   }
 
@@ -119,24 +152,5 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async getUser(@Body() userid: string): Promise<any> {
     return await this.userDB.findUserById(userid);
-  }
-
-   @Post('upload')
-   @UseInterceptors(
-    FileInterceptor('image',{storage:  diskStorage({
-      destination: "./uploads",
-      filename: (req, file, callback) => {  
-        console.log(file)     
-        callback(null, file.fieldname + '-' + Date.now());
-      }
-    })
-  }
-  
-    ),
-  )
-   uploadFile(@UploadedFile() file, @Body() data):any{
-    
-    this.userService.renameFile(file,data);
-    return file;
   }
 }

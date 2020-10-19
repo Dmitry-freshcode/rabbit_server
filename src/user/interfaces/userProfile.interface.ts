@@ -9,4 +9,5 @@ export interface IUserProfile extends Document {
   readonly state: string;
   readonly userId: string;
   readonly isOnline: boolean;
+  readonly userAvatar: string;
 }

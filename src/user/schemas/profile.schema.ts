@@ -13,6 +13,7 @@ export const ProfileSchema = new Schema({
     city: {type: String, required:true},
     state: {type: String, required:true},    
     isOnline: {type: Boolean, required:true, default: false},
+    userAvatar:{type:String, required:true, default: ''}
 },{
     timestamps: {
       createdAt: 'created_at',

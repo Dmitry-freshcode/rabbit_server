@@ -19,7 +19,9 @@ import {
   import { DeleteDto } from '../shared/dto/delete.dto';
   import { UpdateDto } from '../shared/dto/update.dto';
   import {SuccessDto} from '../shared/dto/success.dto';
+  import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('order')
+@UseGuards(JwtAuthGuard)
 @Controller('order')
 export class OrderController {
     private readonly logger = new Logger(OrderController.name);    

@@ -38,7 +38,7 @@ import { MulterModule } from '@nestjs/platform-express';
     ProfileRepository,
     LocationRepository,
   ],
-  exports: [UserRepository,LocationRepository],
+  exports: [UserRepository,LocationRepository,UserService],
 })
 export class UserModule {}
 

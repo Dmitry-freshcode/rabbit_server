@@ -3,7 +3,7 @@ import {
     Body,
     Logger,   
     Query,    
-    //UseGuards,       
+    UseGuards,       
     Get,
     Post,  
   } from '@nestjs/common';
@@ -15,12 +15,14 @@ import {
   import { IMessage } from './interfaces/message.interface'
   import { CreateMessageDto } from './dto/message.dto';
   import { ChatMessageDto } from './dto/chatMessage.dto';
-  import { UserChatsDto } from './dto/userChats.dto'
-  import { IChat } from './interfaces/chat.interface'
+  import { UserChatsDto } from './dto/userChats.dto';
+  import { IChat } from './interfaces/chat.interface';
   import {SuccessDto} from '../shared/dto/success.dto';
+  import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 
   @ApiTags('chat')
+  @UseGuards(JwtAuthGuard)
   @Controller('chat')
 export class ChatController {
     private readonly logger = new Logger(ChatController.name);
