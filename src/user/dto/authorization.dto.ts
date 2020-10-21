@@ -1,28 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, IsOptional} from 'class-validator';
+import { IsString } from 'class-validator';
 
-export class CreateUserDto { 
+export class AuthorizationDto { 
+    @ApiProperty({
+        format: 'string',
+      }) 
+    @IsString()   
+    id: string;
     @ApiProperty({
         format: 'string',
       }) 
     @IsString()
-    @IsEmail()
-    email: string;
-    @ApiProperty({
-        format: 'string',
-      }) 
-    @IsString()
-    password?: string;   
+    status: string;   
     @ApiProperty({
       format: 'string',
-    }) 
-    @IsOptional()
+    })     
     @IsString()
-    strategy: string;
+    role: string;
     @ApiProperty({
       format: 'string',
-    }) 
-    @IsOptional()
+    })   
     @IsString()
-    status: string;        
+    access_token: string;        
 }

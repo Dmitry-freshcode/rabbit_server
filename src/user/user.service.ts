@@ -4,6 +4,7 @@ import { UserRepository } from './user.repository';
 import { ProfileRepository } from './profile.repository';
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
+import { AuthorizationDto } from './dto/authorization.dto';
 import { ProfileDto } from './dto/profile.dto';
 import { SuccessDto } from '../shared/dto/success.dto';
 import { IUser } from './interfaces/user.interface';
@@ -24,25 +25,32 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(createUser: CreateUserDto): Promise<SuccessDto> {
-    const userByEmail = await this.userDB.findUserByEmail(createUser.email);
-    if (userByEmail) {
-      throw new HttpException(
-        'User with this email address already exists',
-        HttpStatus.CONFLICT,
-      );
+  errorRes(value, msg: string): void {
+    if (value) {
+      throw new HttpException(msg, HttpStatus.CONFLICT);
     }
-    let hash='';
-    if(createUser.password) {
-      const saltRounds = 10;
-      const salt = await bcrypt.genSalt(saltRounds);
-      hash = await bcrypt.hash(createUser.password, salt);
-    }    
+  }
+
+  async register(createUser: CreateUserDto): Promise<AuthorizationDto> {
+    const userByEmail = await this.userDB.findUserByEmail(createUser.email);
+    this.errorRes(userByEmail, 'User with this email address already exists');
+    this.errorRes(!createUser.password, 'Password is empty');
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(createUser.password, salt);
     const user = _.assign(createUser, { password: hash });
     const newUser = await this.userDB.createUser(user);
-    this.sendConfirmation(newUser);
+    if (createUser.strategy !== 'google') {
+      this.sendConfirmation(newUser);      
+    }
     this.logger.log(`user with email ${user.email} created`);
-    return { success: true };
+    const response = {
+      id: newUser._id,
+      role:newUser.role,
+      status:newUser.status,
+      access_token:''      
+    }
+    return response;
   }
 
   async sendConfirmation(user: IUser): Promise<void> {
@@ -57,9 +65,9 @@ export class UserService {
     });
     this.sendMail(token, user);
   }
-  Ш;
+
   async updateMail(email: string): Promise<SuccessDto> {
-    const user = await this.userDB.findUserByEmail(email);    
+    const user = await this.userDB.findUserByEmail(email);
     if (user.status === 'created') {
       await this.sendConfirmation(user);
       return { success: true };
@@ -93,19 +101,22 @@ export class UserService {
     };
   }
 
-  async addInfo(profile: ProfileDto,filename:string): Promise<CreateUserProfileDto> {
+  async addInfo(
+    profile: ProfileDto,
+    role: string,
+    filename: string,
+  ): Promise<CreateUserProfileDto> {
     const user = await this.userDB.findUserById(profile.userId);
+    this.errorRes(!user, 'User with this email address not found');
     const findProfile = await this.profileDB.findProfileByUserId(user._id);
-    if (findProfile) {
-      throw new HttpException(
-        'Profile with this email address already exists',
-        HttpStatus.CONFLICT,
-      );
-    }
-    const userAvatar = path.join( process.env.APP_URL, 'user/image/'+filename);
-    const creatProfile = {...profile, userAvatar};  
+    this.errorRes(
+      findProfile,
+      'Profile with this email address already exists',
+    );
+    const userAvatar = path.join(process.env.APP_URL, 'user/image/' + filename);
+    const creatProfile = { ...profile, userAvatar };
     const newProfile = await this.profileDB.createProfile(creatProfile);
-    await this.userDB.updateStatus(profile.userId, 'confirmed');
+    await this.userDB.updateById(profile.userId, { status: 'confirmed', role });
     this.logger.log(`add profile for ${user.email}`);
     return newProfile;
   }
@@ -120,23 +131,24 @@ export class UserService {
         pass: `${process.env.SEND_MAIL_PASSWORD}`, // generated ethereal password
       },
     });
+    const link = `${process.env.APP_URL}/user/confirmUser?token=${token}`;
     await transporter.sendMail({
       to: `${user.email}`, // list of receivers
-      subject: 'Сomplete registration', // Subject line
-      text: 'Сomplete registration', // plain text body
-      html: `Сomplete registration by clicking on the link : </br>${process.env.APP_URL}/user/confirmUser?token=${token}`, // html body
+      subject: 'Complete registration', // Subject line
+      text: 'Complete registration', // plain text body
+      html: `Complete registration by clicking on the link : </br>, ${link}`// html body
     });
     this.logger.log(`send confirmation email to ${user.email}`);
+    console.log(link);
   }
 
-  async renameFile(file,data):Promise<void>{
+  async renameFile(file, data): Promise<void> {
     console.log(file);
-   const name = path.extname(file.filename);
-   fs.rename(file.path,`./upload/${data.id}${name}`,(err) => {
-    if (err) throw err;   
-  })
-   console.log(name);
-  return
+    const name = path.extname(file.filename);
+    fs.rename(file.path, `./upload/${data.id}${name}`, err => {
+      if (err) throw err;
+    });
+    console.log(name);
+    return;
   }
-
 }

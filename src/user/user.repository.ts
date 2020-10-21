@@ -16,8 +16,8 @@ export class UserRepository {
     return await user.save();
   }
 
-  async updateStatus(id: string, status: string): Promise<void> {
-    return await this.userModel.updateOne({ _id: id }, { status: status });
+  async updateById(id: string, property): Promise<void> {
+    return await this.userModel.updateOne({ _id: id }, property);
   }
 
   async findUserByEmail(email: string): Promise<IUser | undefined> {

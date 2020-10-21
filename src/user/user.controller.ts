@@ -26,6 +26,7 @@ import { IUserProfile } from './interfaces/userProfile.interface';
 import { CreateUserDto } from './dto/createUser.dto';
 import { ProfileDto } from './dto/profile.dto';
 import { CreateLocationDto } from './dto/location.dto';
+import { AuthorizationDto } from './dto/authorization.dto';
 import { NearDto } from './dto/near.dto';
 import { DeleteDto } from '../shared/dto/delete.dto';
 import { UpdateDto } from '../shared/dto/update.dto';
@@ -48,7 +49,7 @@ export class UserController {
 
   @Post()
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async addUser(@Body() user: CreateUserDto): Promise<SuccessDto> {
+  async addUser(@Body() user: CreateUserDto): Promise<AuthorizationDto> {
     return this.userService.register(user);
   }
 
@@ -76,10 +77,11 @@ export class UserController {
   uploadFile(
     @UploadedFile() file,
     @Body() profile: ProfileDto,
+    @Body('role') role:string,
     @Req() req
   ): Promise<any>{    
     if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
-    return this.userService.addInfo(profile, file.filename);
+    return this.userService.addInfo(profile,role, file.filename);
   }
 
   @Get('image/:imagename')
