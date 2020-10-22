@@ -78,28 +78,28 @@ export class UserService {
     );
   }
 
-  async confirmUser(token: string): Promise<any> {
-    const decoded = await this.jwtService.decode(token, { json: true });
-    const user = await this.userDB.findUserById(decoded['_id']);
-    const isProfile = await this.profileDB.findProfileByUserId(decoded['_id']);
-    if (
-      user.status === 'created' &&
-      moment(new Date(decoded['exp'] * 1000)).isAfter(Date.now())
-    ) {
-      this.logger.log(`confirm ${user.email} user`);
-      return {
-        isProfile: isProfile ? true : false,
-        isTokenValid: true,
-        userId: decoded['_id'],
-      };
-    }
-    this.logger.log(`wrong confirm token`);
-    return {
-      isProfile: isProfile ? true : false,
-      isTokenValid: false,
-      userId: '',
-    };
-  }
+  // async confirmUser(token: string): Promise<any> {
+  //   const decoded = await this.jwtService.decode(token, { json: true });
+  //   const user = await this.userDB.findUserById(decoded['_id']);
+  //   const isProfile = await this.profileDB.findProfileByUserId(decoded['_id']);
+  //   if (
+  //     user.status === 'created' &&
+  //     moment(new Date(decoded['exp'] * 1000)).isAfter(Date.now())
+  //   ) {
+  //     this.logger.log(`confirm ${user.email} user`);
+  //     return {
+  //       isProfile: isProfile ? true : false,
+  //       isTokenValid: true,
+  //       userId: decoded['_id'],
+  //     };
+  //   }
+  //   this.logger.log(`wrong confirm token`);
+  //   return {
+  //     isProfile: isProfile ? true : false,
+  //     isTokenValid: false,
+  //     userId: '',
+  //   };
+  // }
 
   async addInfo(
     profile: ProfileDto,
@@ -131,7 +131,7 @@ export class UserService {
         pass: `${process.env.SEND_MAIL_PASSWORD}`, // generated ethereal password
       },
     });
-    const link = `${process.env.APP_URL}/user/confirmUser?token=${token}`;
+    const link = `${process.env.FRONT_URL}/confirmUser/${token}`;
     await transporter.sendMail({
       to: `${user.email}`, // list of receivers
       subject: 'Complete registration', // Subject line

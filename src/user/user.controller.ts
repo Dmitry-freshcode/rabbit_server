@@ -138,17 +138,17 @@ export class UserController {
     return this.locationDB.nearStaff(category, lat, lng);
   }
 
-  @Get('confirmUser')
-  @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async confirm(@Query('token') token: string): Promise<SuccessDto> {
-    return this.userService.confirmUser(token);
-  }
+  // @Get('confirmUser')
+  // @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+  // async confirm(@Query('token') token: string): Promise<SuccessDto> {
+  //   return this.userService.confirmUser(token);
+  // }
 
-  @Get('updateToken')
-  @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async updateToken(@Query('email') email: string): Promise<SuccessDto> {
-    return this.userService.updateMail(email);
-  }
+  // @Get('updateToken')
+  // @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
+  // async updateToken(@Query('email') email: string): Promise<SuccessDto> {
+  //   return this.userService.updateMail(email);
+  // }
 
   @Post('getUser')
   @UseGuards(JwtAuthGuard)

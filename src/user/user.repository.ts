@@ -23,7 +23,7 @@ export class UserRepository {
   async findUserByEmail(email: string): Promise<IUser | undefined> {
     return await this.userModel.findOne({ email: email }).exec();
   }
-  async findUserById(id: string): Promise<IUser | undefined> {
+  async findUserById(id: string): Promise<IUser | undefined> {    
     return await this.userModel.findOne({ _id: id }).exec();
   }
 }
