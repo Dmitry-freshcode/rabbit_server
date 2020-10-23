@@ -12,7 +12,7 @@ export class CreateUserDto {
         format: 'string',
       }) 
     @IsString()
-    password?: string;   
+    password: string;   
     @ApiProperty({
       format: 'string',
     }) 

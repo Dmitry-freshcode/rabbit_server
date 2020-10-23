@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RolesGuard } from './role/roles.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { UserService } from '../user/user.service'
+import { CryptoService } from 'src/utils/crypto';
 
 
 
@@ -32,7 +33,7 @@ import { UserService } from '../user/user.service'
     JwtStrategy,
     LocalStrategy,
     GoogleStrategy,
-    //UserService,
+    CryptoService,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

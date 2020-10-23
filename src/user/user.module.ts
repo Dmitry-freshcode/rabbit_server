@@ -11,6 +11,8 @@ import { LocationSchema } from './schemas/location.schema'
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
+import { CryptoService } from 'src/utils/crypto';
+import { MailService } from 'src/utils/mail';
 
 @Module({
   imports: [
@@ -37,8 +39,10 @@ import { MulterModule } from '@nestjs/platform-express';
     UserRepository,
     ProfileRepository,
     LocationRepository,
+    CryptoService,
+    MailService,
+
   ],
   exports: [UserRepository,ProfileRepository,LocationRepository,UserService],
 })
 export class UserModule {}
-

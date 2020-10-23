@@ -49,8 +49,8 @@ export class UserController {
 
   @Post()
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
-  async addUser(@Body() user: CreateUserDto): Promise<AuthorizationDto> {
-    return this.userService.register(user);
+  async addUser(@Body() user: CreateUserDto): Promise<SuccessDto> {
+    return this.userService.registerLocal(user);
   }
 
   @Post('profile')
@@ -81,7 +81,7 @@ export class UserController {
     @Req() req
   ): Promise<any>{    
     if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
-    return this.userService.addInfo(profile,role, file.filename);
+    return this.userService.addInfo(profile, file.filename);
   }
 
   @Get('image/:imagename')

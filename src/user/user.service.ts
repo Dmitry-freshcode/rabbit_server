@@ -1,7 +1,8 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from './user.repository';
 import { ProfileRepository } from './profile.repository';
+import { AuthService } from '../auth/auth.service'
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
 import { AuthorizationDto } from './dto/authorization.dto';
@@ -15,14 +16,19 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import * as path from 'path';
 import * as fs from 'fs';
+import { AuthModule } from 'src/auth/auth.module';
+import { MailService } from 'src/utils/mail';
+import { CryptoService } from 'src/utils/crypto';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   constructor(
     private userDB: UserRepository,
-    private profileDB: ProfileRepository,
+    private profileDB: ProfileRepository,    
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
+    private readonly cryptoService: CryptoService,
   ) {}
 
   errorRes(value, msg: string): void {
@@ -31,39 +37,27 @@ export class UserService {
     }
   }
 
-  async register(createUser: CreateUserDto): Promise<AuthorizationDto> {
+  async registerLocal(createUser: CreateUserDto): Promise<SuccessDto> {
     const userByEmail = await this.userDB.findUserByEmail(createUser.email);
     this.errorRes(userByEmail, 'User with this email address already exists');
     this.errorRes(!createUser.password, 'Password is empty');
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hash = await bcrypt.hash(createUser.password, salt);
+    const hash = await this.cryptoService.passHash(createUser.password);
     const user = _.assign(createUser, { password: hash });
-    const newUser = await this.userDB.createUser(user);
-    if (createUser.strategy !== 'google') {
-      this.sendConfirmation(newUser);      
-    }
-    this.logger.log(`user with email ${user.email} created`);
-    const response = {
-      id: newUser._id,
-      role:newUser.role,
-      status:newUser.status,
-      access_token:''      
-    }
-    return response;
+    const newUser = await this.registerUser(user); 
+    this.sendConfirmation(newUser);   
+    return {success: true};
   }
 
+  async registerUser(createUser: CreateUserDto): Promise<IUser> {    
+    const newUser = await this.userDB.createUser(createUser);    
+    this.logger.log(`User with email ${newUser.email} created`);  
+    return newUser;
+  }
+
+
   async sendConfirmation(user: IUser): Promise<void> {
-    const expiresIn = 60 * 60 * 24;
-    const tokenPayload = {
-      _id: user._id,
-      email: user.email,
-    };
-    const token = await this.jwtService.sign(tokenPayload, {
-      expiresIn: expiresIn,
-      secret: process.env.SECRET,
-    });
-    this.sendMail(token, user);
+    const mailToken = await this.cryptoService.getMailToken(user._id)
+    this.mailService.sendMail(mailToken, user);
   }
 
   async updateMail(email: string): Promise<SuccessDto> {
@@ -102,13 +96,12 @@ export class UserService {
   // }
 
   async addInfo(
-    profile: ProfileDto,
-    role: string,
+    profile: ProfileDto,    
     filename: string,
   ): Promise<CreateUserProfileDto> {
-    const user = await this.userDB.findUserById(profile.userId);
-    this.errorRes(!user, 'User with this email address not found');
-    const findProfile = await this.profileDB.findProfileByUserId(user._id);
+    const findUser = await this.userDB.findUserById(profile.userId);
+    this.errorRes(!findUser, 'User with this email address not found');
+    const findProfile = await this.profileDB.findProfileByUserId(findUser._id);
     this.errorRes(
       findProfile,
       'Profile with this email address already exists',
@@ -116,31 +109,31 @@ export class UserService {
     const userAvatar = path.join(process.env.APP_URL, 'user/image/' + filename);
     const creatProfile = { ...profile, userAvatar };
     const newProfile = await this.profileDB.createProfile(creatProfile);
-    await this.userDB.updateById(profile.userId, { status: 'confirmed', role });
-    this.logger.log(`add profile for ${user.email}`);
+    await this.userDB.updateById(profile.userId, { status: 'confirmed' });
+    this.logger.log(`add profile for ${findUser.email}`);
     return newProfile;
   }
 
-  async sendMail(token: string, user: IUser): Promise<void> {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: `${process.env.SEND_MAIL}`, // generated ethereal user
-        pass: `${process.env.SEND_MAIL_PASSWORD}`, // generated ethereal password
-      },
-    });
-    const link = `${process.env.FRONT_URL}/confirmUser/${token}`;
-    await transporter.sendMail({
-      to: `${user.email}`, // list of receivers
-      subject: 'Complete registration', // Subject line
-      text: 'Complete registration', // plain text body
-      html: `Complete registration by clicking on the link : </br>, ${link}`// html body
-    });
-    this.logger.log(`send confirmation email to ${user.email}`);
-    console.log(link);
-  }
+  // async sendMail(token: Promise<string>, user: IUser): Promise<void> {
+  //   const transporter = nodemailer.createTransport({
+  //     host: 'smtp.gmail.com',
+  //     port: 587,
+  //     secure: false, // true for 465, false for other ports
+  //     auth: {
+  //       user: `${process.env.SEND_MAIL}`, // generated ethereal user
+  //       pass: `${process.env.SEND_MAIL_PASSWORD}`, // generated ethereal password
+  //     },
+  //   });
+  //   const link = `${process.env.FRONT_URL}/confirmUser/${token}`;
+  //   await transporter.sendMail({
+  //     to: `${user.email}`, // list of receivers
+  //     subject: 'Complete registration', // Subject line
+  //     text: 'Complete registration', // plain text body
+  //     html: `Complete registration by clicking on the link : </br>, ${link}`// html body
+  //   });
+  //   this.logger.log(`send confirmation email to ${user.email}`);
+  //   console.log(link);
+  // }
 
   async renameFile(file, data): Promise<void> {
     console.log(file);

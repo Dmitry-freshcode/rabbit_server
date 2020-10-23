@@ -7,7 +7,9 @@ import {
   Req,
   Redirect,
   Query,
+  Request
 } from '@nestjs/common';
+//import { Request } from 'express';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -16,11 +18,14 @@ import { LoginUserDto } from './dto/loginUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../user/user.service';
 import { SuccessDto } from '../shared/dto/success.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CryptoService } from 'src/utils/crypto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
+    private cryptoService:CryptoService,
     private authService: AuthService,
     private readonly userService: UserService,
   ) {}
@@ -40,6 +45,8 @@ export class AuthController {
     };
   }
 
+
+
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   @Redirect()
@@ -57,8 +64,10 @@ export class AuthController {
 
   @Get('confirmUser')
   async confirm(@Query('token') token: string): Promise<any> {
+    
     const req = await this.authService.confirmUser(token);
-    return req;
+    console.log(req)
+    return {access_token: req};
   }
 
   @Get('updateToken')
@@ -66,4 +75,14 @@ export class AuthController {
   async updateToken(@Query('email') email: string): Promise<SuccessDto> {
     return this.userService.updateMail(email);
   }
+
+
+  @Get('test')
+  @UseGuards(JwtAuthGuard)  
+  async test(@Req() req: Request) {
+    const token = req.headers["authorization"].replace('Bearer ', '');
+    return this.cryptoService.decodeToken(token);
+  }
+
+
 }

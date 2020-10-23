@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString  } from 'class-validator';
 
 export class AuthorizationDto { 
     @ApiProperty({
@@ -19,7 +19,7 @@ export class AuthorizationDto {
     role: string;
     @ApiProperty({
       format: 'string',
-    })   
+    })      
     @IsString()
     access_token: string;        
 }
