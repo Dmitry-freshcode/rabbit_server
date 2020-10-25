@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { CryptoService } from 'src/utils/crypto';
 import { MailService } from 'src/utils/mail';
+import { FilesService } from 'src/utils/files';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { MailService } from 'src/utils/mail';
     LocationRepository,
     CryptoService,
     MailService,
+    FilesService,
 
   ],
   exports: [UserRepository,ProfileRepository,LocationRepository,UserService],

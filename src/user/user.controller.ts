@@ -35,6 +35,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
 import { Roles } from '../auth/role/roles.decorator';
 import * as path from 'path';
+import { CreateUserProfileDto } from './dto/createUserProfile.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -54,10 +55,11 @@ export class UserController {
   }
 
   @Post('profile')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads/profileimages',
+        destination: './src/uploads/profileimages',
         filename: (req, file, cb) => {
           const filename: string = Date.now().toString();
           const extension: string = path.parse(file.originalname).ext;
@@ -78,16 +80,20 @@ export class UserController {
     @UploadedFile() file,
     @Body() profile: ProfileDto,
     @Body('role') role:string,
-    @Req() req
-  ): Promise<any>{    
+    @Req() req   
+  ): Promise<any>{   
+    const token = req.headers["authorization"].replace('Bearer ', '');  
     if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
-    return this.userService.addInfo(profile, file.filename);
+    console.log(token)
+    console.log(file.filename)
+    console.log(profile)
+    return this.userService.addInfo(profile,token, file.filename);
   }
 
   @Get('image/:imagename')
   findProfileImage(@Param('imagename') imagename, @Res() res) {
     return res.sendFile(
-      path.join(process.cwd(), 'uploads/profileimages/' + imagename),
+      path.join(process.cwd(), 'src/uploads/profileimages/' + imagename),
     );
   }
 
@@ -95,7 +101,8 @@ export class UserController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
-  async getProfile(@Query('userId') userId: string): Promise<any> {
+   
+  async getProfile(@Query('userId') userId: string): Promise<any> {    
     return this.profileDB.findProfileByUserId(userId);
   }
 

@@ -21,10 +21,8 @@ export class CryptoService {
     return token;
   }
 
-  async decodeToken(token: string): Promise<TokenDto> {
-    console.log(token);
-    const decoded = await this.jwtService.decode(token, { json: true });
-    console.log(decoded);
+  async decodeToken(token: string): Promise<TokenDto> {    
+    const decoded = await this.jwtService.decode(token, { json: true });   
     if (decoded) {
       const dec = {
         id: decoded['id'],

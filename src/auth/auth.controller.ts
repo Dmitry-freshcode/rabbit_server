@@ -65,15 +65,16 @@ export class AuthController {
   @Get('confirmUser')
   async confirm(@Query('token') token: string): Promise<any> {
     
-    const req = await this.authService.confirmUser(token);
-    console.log(req)
+    const req = await this.authService.confirmUser(token);    
     return {access_token: req};
   }
 
   @Get('updateToken')
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
   async updateToken(@Query('email') email: string): Promise<SuccessDto> {
-    return this.userService.updateMail(email);
+    const res = this.userService.updateMail(email);
+    console.log(res);
+    return res;
   }
 
 

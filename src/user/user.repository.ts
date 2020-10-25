@@ -1,5 +1,5 @@
 import { IUser } from './interfaces/user.interface';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/createUser.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,6 +16,46 @@ export class UserRepository {
     return await user.save();
   }
 
+  async getUserState(id: string) {
+    return await this.userModel.aggregate([
+      {
+        $match: {
+          _id: Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: 'profiles',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'profile',
+        },
+      },
+      {
+        $unwind: '$profile',
+      },
+      {
+        $lookup: {
+          from: 'locations',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'location',
+        },
+      },
+      {
+        $unwind: '$location',
+      },
+      {
+        $project: {
+          _id: 1,
+          role: 1,
+          profile: 1,
+          location: '$location.loc.coordinates',
+        },
+      },
+    ]);
+  }
+
   async updateById(id: string, property): Promise<void> {
     return await this.userModel.updateOne({ _id: id }, property);
   }
@@ -23,7 +63,7 @@ export class UserRepository {
   async findUserByEmail(email: string): Promise<IUser | undefined> {
     return await this.userModel.findOne({ email: email }).exec();
   }
-  async findUserById(id: string): Promise<IUser | undefined> {    
+  async findUserById(id: string): Promise<IUser | undefined> {
     return await this.userModel.findOne({ _id: id }).exec();
   }
 }

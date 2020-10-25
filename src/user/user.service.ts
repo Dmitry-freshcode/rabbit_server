@@ -1,8 +1,15 @@
-import { Injectable, HttpException, HttpStatus, Logger, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Logger,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from './user.repository';
 import { ProfileRepository } from './profile.repository';
-import { AuthService } from '../auth/auth.service'
+import { AuthService } from '../auth/auth.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { CreateUserProfileDto } from './dto/createUserProfile.dto';
 import { AuthorizationDto } from './dto/authorization.dto';
@@ -19,16 +26,20 @@ import * as fs from 'fs';
 import { AuthModule } from 'src/auth/auth.module';
 import { MailService } from 'src/utils/mail';
 import { CryptoService } from 'src/utils/crypto';
+import { LocationRepository } from './location.repository';
+import { FilesService } from 'src/utils/files';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   constructor(
     private userDB: UserRepository,
-    private profileDB: ProfileRepository,    
+    private locationDB: LocationRepository,
+    private profileDB: ProfileRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly cryptoService: CryptoService,
+    private readonly fileService: FilesService,
   ) {}
 
   errorRes(value, msg: string): void {
@@ -43,20 +54,19 @@ export class UserService {
     this.errorRes(!createUser.password, 'Password is empty');
     const hash = await this.cryptoService.passHash(createUser.password);
     const user = _.assign(createUser, { password: hash });
-    const newUser = await this.registerUser(user); 
-    this.sendConfirmation(newUser);   
-    return {success: true};
+    const newUser = await this.registerUser(user);
+    this.sendConfirmation(newUser);
+    return { success: true };
   }
 
-  async registerUser(createUser: CreateUserDto): Promise<IUser> {    
-    const newUser = await this.userDB.createUser(createUser);    
-    this.logger.log(`User with email ${newUser.email} created`);  
+  async registerUser(createUser: CreateUserDto): Promise<IUser> {
+    const newUser = await this.userDB.createUser(createUser);
+    this.logger.log(`User with email ${newUser.email} created`);
     return newUser;
   }
 
-
   async sendConfirmation(user: IUser): Promise<void> {
-    const mailToken = await this.cryptoService.getMailToken(user._id)
+    const mailToken = await this.cryptoService.getMailToken(user._id);
     this.mailService.sendMail(mailToken, user);
   }
 
@@ -96,22 +106,40 @@ export class UserService {
   // }
 
   async addInfo(
-    profile: ProfileDto,    
+    profile: ProfileDto,
+    token: string,
     filename: string,
-  ): Promise<CreateUserProfileDto> {
-    const findUser = await this.userDB.findUserById(profile.userId);
-    this.errorRes(!findUser, 'User with this email address not found');
+  ): Promise<any> {
+    const decoded = await this.cryptoService.decodeToken(token);
+    const findUser = await this.userDB.findUserById(decoded.id);
+    if (!findUser) {
+      this.fileService.removeAvatar(filename);
+      throw new HttpException(
+        'User with this email address not found',
+        HttpStatus.CONFLICT,
+      );
+    }
     const findProfile = await this.profileDB.findProfileByUserId(findUser._id);
-    this.errorRes(
-      findProfile,
-      'Profile with this email address already exists',
-    );
+    if (findProfile) {
+      this.fileService.removeAvatar(filename);
+      throw new HttpException(
+        'Profile with this email address already exists',
+        HttpStatus.CONFLICT,
+      );
+    }
+
     const userAvatar = path.join(process.env.APP_URL, 'user/image/' + filename);
-    const creatProfile = { ...profile, userAvatar };
-    const newProfile = await this.profileDB.createProfile(creatProfile);
-    await this.userDB.updateById(profile.userId, { status: 'confirmed' });
+    const creatProfile = { ...profile, userAvatar, userId: findUser._id };
+    await this.profileDB.createProfile(creatProfile);
+    await this.userDB.updateById(findUser._id, {
+      status: 'confirmed',
+      role: profile.role,
+    });
     this.logger.log(`add profile for ${findUser.email}`);
-    return newProfile;
+    const db = await this.userDB.getUserState(findUser._id);
+    console.log(db);
+    return db[0];
+    //return {...newProfile};
   }
 
   // async sendMail(token: Promise<string>, user: IUser): Promise<void> {

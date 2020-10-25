@@ -129,23 +129,25 @@ export class AuthService {
   }
 
   async confirmUser(token: string): Promise<any> {
-    const decodedToken = await this.cryptoService.decodeToken(token); 
-    console.log(decodedToken)
+    const decodedToken = await this.cryptoService.decodeToken(token);    
     if (!decodedToken) {
       throw new HttpException('Wrong token', HttpStatus.UNAUTHORIZED);
-    }     
+    };
+    if (!decodedToken.valid) {
+      throw new HttpException('Token is old, get new token', HttpStatus.PARTIAL_CONTENT);
+    }       
     const user = await this.usersDB.findUserById(decodedToken.id);
     if (!user) {
       throw new HttpException('User not found, please signup', HttpStatus. CONFLICT);
-    }  
-    const isProfile = await this.profileDB.findProfileByUserId(user._id);
+    }    
+    const isProfile = await this.profileDB.findProfileByUserId(user._id);   
     if (isProfile) {
       throw new HttpException('Profile is exist', HttpStatus. BAD_REQUEST);
     }      
     if (
       user.status === 'created'    
     ) {    
-     // await this.usersDB.updateById(user._id,{status:"confirmed"});     
+     await this.usersDB.updateById(user._id,{status:"confirmed"});     
       this.logger.log(`confirm ${user.email} user`); 
     }
    return this.cryptoService.getToken(user._id);
