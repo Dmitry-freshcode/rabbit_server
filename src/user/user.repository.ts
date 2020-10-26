@@ -16,43 +16,46 @@ export class UserRepository {
     return await user.save();
   }
 
-  async getUserState(id: string) {
+  async getUserState(id: string) {  
     return await this.userModel.aggregate([
       {
-        $match: {
-          _id: Types.ObjectId(id),
-        },
-      },
-      {
-        $lookup: {
-          from: 'profiles',
-          localField: '_id',
-          foreignField: 'userId',
-          as: 'profile',
-        },
-      },
-      {
-        $unwind: '$profile',
-      },
-      {
-        $lookup: {
-          from: 'locations',
-          localField: '_id',
-          foreignField: 'userId',
-          as: 'location',
-        },
-      },
-      {
-        $unwind: '$location',
-      },
-      {
-        $project: {
-          _id: 1,
-          role: 1,
-          profile: 1,
-          location: '$location.loc.coordinates',
-        },
-      },
+        '$match': {
+          '_id': Types.ObjectId(id)
+        }
+      }, {
+        '$lookup': {
+          'from': 'profiles', 
+          'localField': '_id', 
+          'foreignField': 'userId', 
+          'as': 'profile'
+        }
+      }, {
+        '$unwind': {
+            'path': '$profile', 
+            'includeArrayIndex': '0', 
+            'preserveNullAndEmptyArrays': true
+        }
+    }, {
+        '$lookup': {
+          'from': 'locations', 
+          'localField': '_id', 
+          'foreignField': 'userId', 
+          'as': 'location'
+        }
+      }, {
+        '$unwind': {
+            'path': '$location', 
+            'includeArrayIndex': '0', 
+            'preserveNullAndEmptyArrays': true
+        }
+    }, {
+        '$project': {
+            '_id': 1, 
+            'role': 1, 
+            'profile': 1, 
+            'location': '$location.loc.coordinates'
+        }
+    }
     ]);
   }
 

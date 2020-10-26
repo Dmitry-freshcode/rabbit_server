@@ -39,11 +39,11 @@ export class CryptoService {
     return null;
   }
 
-  async getToken(user: IUser): Promise<string> {   
+  async getToken(user: any): Promise<string> {   
     const payload = { id: user._id, role: user.role };
     const token = await this.jwtService.sign(payload, {
       secret: `${process.env.JWT_SECRET}`,
-    });
+    });    
     return token;
   }
 

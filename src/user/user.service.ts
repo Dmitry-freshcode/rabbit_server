@@ -127,7 +127,6 @@ export class UserService {
         HttpStatus.CONFLICT,
       );
     }
-
     const userAvatar = path.join(process.env.APP_URL, 'user/image/' + filename);
     const creatProfile = { ...profile, userAvatar, userId: findUser._id };
     await this.profileDB.createProfile(creatProfile);
@@ -136,11 +135,18 @@ export class UserService {
       role: profile.role,
     });
     this.logger.log(`add profile for ${findUser.email}`);
-    const db = await this.userDB.getUserState(findUser._id);
-    console.log(db);
-    return db[0];
-    //return {...newProfile};
+    const state = await this.userDB.getUserState(findUser._id)     
+    return state[0];
   }
+
+
+  async getUserState(token:string):Promise<any>{
+    const decode = await this.cryptoService.decodeToken(token)
+    const userState = await this.userDB.getUserState(decode.id);
+    const res={...userState[0],access_token:token}
+    return res;
+  }
+
 
   // async sendMail(token: Promise<string>, user: IUser): Promise<void> {
   //   const transporter = nodemailer.createTransport({

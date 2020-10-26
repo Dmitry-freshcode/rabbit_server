@@ -84,9 +84,7 @@ export class UserController {
   ): Promise<any>{   
     const token = req.headers["authorization"].replace('Bearer ', '');  
     if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
-    console.log(token)
-    console.log(file.filename)
-    console.log(profile)
+   
     return this.userService.addInfo(profile,token, file.filename);
   }
 
@@ -95,6 +93,13 @@ export class UserController {
     return res.sendFile(
       path.join(process.cwd(), 'src/uploads/profileimages/' + imagename),
     );
+  }
+
+  @Get('state')
+  @UseGuards(JwtAuthGuard)    
+  async getUserState( @Req() req  ): Promise<any> { 
+    const token = req.headers["authorization"].replace('Bearer ', '');     
+    return this.userService.getUserState(token);
   }
 
   //@Roles(['admin'])
@@ -116,7 +121,7 @@ export class UserController {
   @Post('location')
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: CreateLocationDto })
-  async addLocation(@Body() data: CreateLocationDto): Promise<ILocation> {
+  async addLocation(@Body() data: CreateLocationDto): Promise<any> {
     return this.locationDB.createLocation(data);
   }
 

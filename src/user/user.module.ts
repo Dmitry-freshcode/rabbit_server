@@ -42,7 +42,7 @@ import { FilesService } from 'src/utils/files';
     LocationRepository,
     CryptoService,
     MailService,
-    FilesService,
+    FilesService, 
 
   ],
   exports: [UserRepository,ProfileRepository,LocationRepository,UserService],

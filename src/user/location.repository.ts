@@ -7,10 +7,12 @@ import { UpdateDto } from '../shared/dto/update.dto';
 import { NearDto } from './dto/near.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class LocationRepository {
   constructor(
+    private userDB: UserRepository,
     @InjectModel('Location')
     private locationModel: Model<ILocation>,
   ) {}
@@ -18,7 +20,7 @@ export class LocationRepository {
   async findAll(query): Promise<ILocation[] | undefined> {
     return await this.locationModel.find(query).exec();
   }
-  async createLocation(Location: CreateLocationDto): Promise<ILocation> {
+  async createLocation(Location: CreateLocationDto): Promise<any> {
     const location = new this.locationModel({
       userId: Location.userId,
       loc: {
@@ -26,7 +28,9 @@ export class LocationRepository {
         coordinates: Location.location,
       },
     });
-    return await location.save();
+    await location.save();
+    const state = await this.userDB.getUserState(Location.userId);  
+    return state[0];
   }
   async updateLocation(Location: ILocation): Promise<UpdateDto> {
     return await this.locationModel.updateOne({ _id: Location._id }, Location);

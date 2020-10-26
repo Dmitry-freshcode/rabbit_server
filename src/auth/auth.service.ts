@@ -48,24 +48,19 @@ export class AuthService {
     return null;
   }
 
-  async login(data: LoginUserDto): Promise<AuthorizationDto> {
-    const isExist = await this.validateUser(data.email, data.password);
+  async login(data: LoginUserDto): Promise<any> {
+    const isExist = await this.validateUser(data.email, data.password);    
     if (isExist) {
-      const user = await this.usersDB.findUserByEmail(data.email);
-      return await this.getUserData(user._id);
+      const user = await this.usersDB.findUserByEmail(data.email);       
+      return await this.cryptoService.getToken(user);
     }
     throw new HttpException('Wrong email or pass', HttpStatus.BAD_REQUEST);
   }
 
-  async getUserData(id: string): Promise<AuthorizationDto> {
-    const user = await this.usersDB.findUserById(id);
-      const token = await this.cryptoService.getToken(user);
-        return {
-        access_token: token,
-        id: user._id,
-        role: user.role,
-        status: user.status,
-      };
+  async getUserData(id: string): Promise<any> {
+    const userState = await this.usersDB.getUserState(id);
+     // const token = await this.cryptoService.getToken(userState);    
+        return userState;
     }
 
     // async getMailToken(id: string): Promise<string> {
@@ -111,7 +106,7 @@ export class AuthService {
     return verify(token).catch(console.error);
   }
 
-  async googleCreatAndLogin(token: string): Promise<AuthorizationDto> {
+  async googleCreatAndLogin(token: string): Promise<any> {
     const email = await this.verifyGoogleToken(token);
     if (email) {
       const user = await this.usersDB.findUserByEmail(email);
@@ -121,11 +116,14 @@ export class AuthService {
           status: 'confirmed',
           strategy: 'google',
           password: process.env.JWT_SECRET,
-        });
-        //return newUser;
+        }); 
+        const token =  await this.cryptoService.getToken(newUser); 
+        return {access_token:token} ;   
       }
-      return this.getUserData(user._id);
+      const token =  await this.cryptoService.getToken(user);      
+      return {access_token:token};
     }
+    throw new HttpException('Wrong google token', HttpStatus.UNAUTHORIZED);
   }
 
   async confirmUser(token: string): Promise<any> {
@@ -150,10 +148,10 @@ export class AuthService {
      await this.usersDB.updateById(user._id,{status:"confirmed"});     
       this.logger.log(`confirm ${user.email} user`); 
     }
-   return this.cryptoService.getToken(user._id);
+   return await this.cryptoService.getToken(user);
   }
 
-  getUrl(url: string, params?): string {
+  getUrl(url: string, params?): string {   
     let resUrl = url;
     if (params) {
       resUrl = url + '?';
@@ -165,6 +163,7 @@ export class AuthService {
         }
       });
     }
+   
     return resUrl;
   }
 }

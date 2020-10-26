@@ -32,8 +32,9 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  async login(@Body() loginUser: LoginUserDto): Promise<AuthorizationDto> {
-    return await this.authService.login(loginUser);
+  async login(@Body() loginUser: LoginUserDto): Promise<any> {
+    const res = await this.authService.login(loginUser);   
+    return {access_token: res};
   }
 
   @Get('google')
@@ -44,7 +45,6 @@ export class AuthController {
       url: `${process.env.FRONT_URL}/callbackGoogle`,
     };
   }
-
 
 
   @Get('google/redirect')
@@ -63,8 +63,7 @@ export class AuthController {
   }
 
   @Get('confirmUser')
-  async confirm(@Query('token') token: string): Promise<any> {
-    
+  async confirm(@Query('token') token: string): Promise<any> {    
     const req = await this.authService.confirmUser(token);    
     return {access_token: req};
   }
@@ -72,8 +71,7 @@ export class AuthController {
   @Get('updateToken')
   @ApiResponse({ status: 200, description: 'OK', type: SuccessDto })
   async updateToken(@Query('email') email: string): Promise<SuccessDto> {
-    const res = this.userService.updateMail(email);
-    console.log(res);
+    const res = this.userService.updateMail(email);  
     return res;
   }
 
