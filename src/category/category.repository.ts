@@ -16,7 +16,7 @@ export class CategoryRepository {
   async findAll(): Promise<ICategory[] | undefined> {
     return await this.categoryModel.find({}).exec();
   }
-  async createCategory(Category: CreateCategoryDto): Promise<ICategory> {
+  async createCategory(Category: any): Promise<ICategory> {
     const service = new this.categoryModel(Category);
     return await service.save();
   }

@@ -79,7 +79,7 @@ export class UserController {
   uploadFile(
     @UploadedFile() file,
     @Body() profile: ProfileDto,
-    @Body('role') role:string,
+    //@Body('role') role:string,
     @Req() req   
   ): Promise<any>{   
     const token = req.headers["authorization"].replace('Bearer ', '');  

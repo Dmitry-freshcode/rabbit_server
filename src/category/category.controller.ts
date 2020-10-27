@@ -8,6 +8,13 @@ import {
   Post,
   Delete,
   Put,
+  UseInterceptors,
+  UploadedFile,
+  Req,
+  HttpException,
+  HttpStatus,
+  Res,
+  Param,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { CategoryRepository } from './category.repository';
@@ -21,9 +28,11 @@ import { ICategoryStaff } from './interfaces/categoryStaff.interface';
 import { SuccessDto } from '../shared/dto/success.dto';
 import { Roles } from '../auth/role/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
 
 @ApiTags('category')
-@UseGuards(JwtAuthGuard)
 @Controller('category')
 export class CategoryController {
   private readonly logger = new Logger(CategoryController.name);
@@ -32,19 +41,11 @@ export class CategoryController {
     private readonly categoryStaffDB: CategoryStaffRepository,
   ) {}
 
-  @Roles(['admin'])
-  @Post()
-  @ApiResponse({
-    status: 200,
-    description: 'Category was created',
-    type: CreateCategoryDto,
-  })
-  async addCategory(@Body() category: CreateCategoryDto): Promise<ICategory> {
-    this.logger.log(`category ${category.name} was created`);
-    return this.categoryDB.createCategory(category);
-  }
-  @Roles(['admin'])
+
+  
+  //@Roles(['admin'])
   @Post('staffCategory')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Service was created',
@@ -57,7 +58,58 @@ export class CategoryController {
     return this.categoryStaffDB.createCategoryStaff(data);
   }
 
+ 
+ 
+  //@Roles(['admin'])
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Category was created',
+    type: CreateCategoryDto,
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './src/uploads/category',
+        filename: (req, file, cb) => {
+          const filename: string = Date.now().toString();
+          const extension: string = path.parse(file.originalname).ext;
+          cb(null, `${filename}${extension}`);
+        },        
+      }),
+      fileFilter:  (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+          cb(null, true);
+        } else { 
+          req.fileValidationError = 'goes wrong on the mimetype';
+          cb(null,false);
+        }
+      }, 
+    }),
+  )  
+  async addCategory(
+    @UploadedFile() file,
+    @Body() category: CreateCategoryDto,
+    @Req() req 
+    ): Promise<ICategory> {    
+    if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
+    const src = path.join(process.env.APP_URL, 'category/image/' + file.filename);
+    this.logger.log(`category ${category.name} was created`);
+    return await this.categoryDB.createCategory({...category, imageSrc: src});
+  }
+
+
+  @Get('image/:imagename')
+  findProfileImage(@Param('imagename') imagename, @Res() res) {
+    return res.sendFile(
+      path.join(process.cwd(), 'src/uploads/category/' + imagename),
+    );
+  }
+
+
   @Get('staffCategory')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Service was created',
@@ -69,6 +121,7 @@ export class CategoryController {
 
   @Roles(['admin'])
   @Put('staffCategory')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Category was updated',
@@ -81,6 +134,7 @@ export class CategoryController {
 
   @Roles(['admin'])
   @Delete()
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Category was deleted',
@@ -93,6 +147,7 @@ export class CategoryController {
 
   @Roles(['admin'])
   @Put()
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Category was updated',
@@ -104,11 +159,13 @@ export class CategoryController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findCategory(@Query('id') id: string): Promise<ICategory | undefined> {
     return this.categoryDB.find(id);
   }
 
   @Get('findAll')
+  @UseGuards(JwtAuthGuard)
   async findAllCategories(): Promise<ICategory[] | undefined> {
     return this.categoryDB.findAll();
   }

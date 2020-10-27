@@ -38,12 +38,6 @@ export class ProfileDto {
   @IsString()
   @IsNotEmpty()
   state: string;
-  // @ApiProperty({
-  //   format: 'string',
-  // })
-  // @IsString()
-  // @IsNotEmpty()
-  // userId: string;
   @ApiProperty({
     format: 'string',
   })
