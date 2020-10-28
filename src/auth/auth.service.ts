@@ -51,8 +51,9 @@ export class AuthService {
   async login(data: LoginUserDto): Promise<any> {
     const isExist = await this.validateUser(data.email, data.password);    
     if (isExist) {
-      const user = await this.usersDB.findUserByEmail(data.email);       
-      return await this.cryptoService.getToken(user);
+      const user = await this.usersDB.findUserByEmail(data.email);
+      const token = await this.cryptoService.getToken(user)       
+      return await this.UserService.getUserState(token);
     }
     throw new HttpException('Wrong email or pass', HttpStatus.BAD_REQUEST);
   }

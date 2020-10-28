@@ -62,7 +62,7 @@ export class CategoryController {
  
   //@Roles(['admin'])
   @Post()
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Category was created',
@@ -92,11 +92,13 @@ export class CategoryController {
     @UploadedFile() file,
     @Body() category: CreateCategoryDto,
     @Req() req 
-    ): Promise<ICategory> {    
+    ):Promise<ICategory> 
+    {    
     if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
-    const src = path.join(process.env.APP_URL, 'category/image/' + file.filename);
+    const src = `${process.env.APP_URL}/category/image/${file.filename}`;   
     this.logger.log(`category ${category.name} was created`);
     return await this.categoryDB.createCategory({...category, imageSrc: src});
+ 
   }
 
 
@@ -164,8 +166,7 @@ export class CategoryController {
     return this.categoryDB.find(id);
   }
 
-  @Get('findAll')
-  @UseGuards(JwtAuthGuard)
+  @Get('findAll')  
   async findAllCategories(): Promise<ICategory[] | undefined> {
     return this.categoryDB.findAll();
   }

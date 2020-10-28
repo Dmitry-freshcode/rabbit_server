@@ -127,7 +127,7 @@ export class UserService {
         HttpStatus.CONFLICT,
       );
     }
-    const userAvatar = path.join(process.env.APP_URL, 'user/image/' + filename);
+    const userAvatar = `${process.env.APP_URL}/user/image/${filename}`;   
     const creatProfile = { ...profile, userAvatar, userId: findUser._id };
     await this.profileDB.createProfile(creatProfile);
     await this.userDB.updateById(findUser._id, {

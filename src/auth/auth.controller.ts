@@ -34,7 +34,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   async login(@Body() loginUser: LoginUserDto): Promise<any> {
     const res = await this.authService.login(loginUser);   
-    return {access_token: res};
+    return res;
   }
 
   @Get('google')

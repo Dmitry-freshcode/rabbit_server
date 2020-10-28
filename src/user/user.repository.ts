@@ -49,13 +49,21 @@ export class UserRepository {
             'preserveNullAndEmptyArrays': true
         }
     }, {
-        '$project': {
-            '_id': 1, 
-            'role': 1, 
-            'profile': 1, 
-            'location': '$location.loc.coordinates'
-        }
-    }
+      '$lookup': {
+          'from': 'categorystaffs', 
+          'localField': '_id', 
+          'foreignField': 'staffId', 
+          'as': 'categories'
+      }
+  }, {
+      '$project': {
+          '_id': 1, 
+          'role': 1, 
+          'profile': 1, 
+          'location': '$location.loc.coordinates', 
+          'categories': '$categories._id'
+      }
+  }
     ]);
   }
 
