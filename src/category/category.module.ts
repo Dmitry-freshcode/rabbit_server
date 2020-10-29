@@ -5,6 +5,7 @@ import { CategorySchema } from './schemas/category.schema';
 import { CategoryStaffSchema } from './schemas/categoryStaff.schema';
 import { CategoryRepository } from './category.repository';
 import { CategoryStaffRepository } from './categoryStaff.repository';
+import { CategoryStaffService } from './categoryStaff.service';
 
 @Module({
   imports:[
@@ -14,7 +15,7 @@ import { CategoryStaffRepository } from './categoryStaff.repository';
     ]),
   ],
   controllers: [CategoryController],
-  providers: [CategoryRepository,CategoryStaffRepository],
+  providers: [CategoryRepository,CategoryStaffRepository,CategoryStaffService],
   exports:[CategoryRepository,CategoryStaffRepository]
 })
 export class CategoryModule {}

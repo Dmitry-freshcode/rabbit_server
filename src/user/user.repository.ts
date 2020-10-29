@@ -48,20 +48,22 @@ export class UserRepository {
             'includeArrayIndex': '0', 
             'preserveNullAndEmptyArrays': true
         }
-    }, {
-      '$lookup': {
-          'from': 'categorystaffs', 
-          'localField': '_id', 
-          'foreignField': 'staffId', 
-          'as': 'categories'
-      }
-  }, {
+    }, 
+  //   {
+  //     '$lookup': {
+  //         'from': 'categorystaffs', 
+  //         'localField': '_id', 
+  //         'foreignField': 'staffId', 
+  //         'as': 'categories'
+  //     }
+  // }, 
+  {
       '$project': {
           '_id': 1, 
           'role': 1, 
           'profile': 1, 
           'location': '$location.loc.coordinates', 
-          'categories': '$categories._id'
+          //'categories': '$categories._id'
       }
   }
     ]);
@@ -77,4 +79,8 @@ export class UserRepository {
   async findUserById(id: string): Promise<IUser | undefined> {
     return await this.userModel.findOne({ _id: id }).exec();
   }
+
+  // async getCategory(id){
+  //   return await this.userModel.findOne({ _id: id }).populate('categorystaffs');
+  // }
 }

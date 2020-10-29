@@ -31,6 +31,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
+import { CategoryStaffService } from './categoryStaff.service';
 
 @ApiTags('category')
 @Controller('category')
@@ -39,6 +40,7 @@ export class CategoryController {
   constructor(
     private readonly categoryDB: CategoryRepository,
     private readonly categoryStaffDB: CategoryStaffRepository,
+    private readonly categoryStaffService: CategoryStaffService,
   ) {}
 
 
@@ -55,7 +57,8 @@ export class CategoryController {
     @Body() data: CreateCategoryStaffDto,
   ): Promise<SuccessDto> {
     this.logger.log(`category for staff: ${data.staffId} was created`);
-    return this.categoryStaffDB.createCategoryStaff(data);
+    return this.categoryStaffService.addStaffCategory(data);    
+    //return this.categoryStaffDB.createCategoryStaff(data);
   }
 
  
@@ -166,7 +169,8 @@ export class CategoryController {
     return this.categoryDB.find(id);
   }
 
-  @Get('findAll')  
+  @Get('findAll') 
+  @UseGuards(JwtAuthGuard) 
   async findAllCategories(): Promise<ICategory[] | undefined> {
     return this.categoryDB.findAll();
   }

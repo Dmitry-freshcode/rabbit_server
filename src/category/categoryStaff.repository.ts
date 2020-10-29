@@ -1,5 +1,5 @@
 import { ICategoryStaff } from './interfaces/categoryStaff.interface';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateCategoryStaffDto } from './dto/categoryStaff.dto';
 import { DeleteDto } from '../shared/dto/delete.dto';
 import { UpdateDto } from '../shared/dto/update.dto';
@@ -34,17 +34,17 @@ export class CategoryStaffRepository{
         return await this.categoryStaffModel.findOne({_id:id}).exec();
     }
 
-    async createCategoryStaff(data:CreateCategoryStaffDto):Promise<SuccessDto>{
-        data.categories.forEach(async (category)=>{
-            const categoryStaff = new this.categoryStaffModel({categoryId:category,staffId:data.staffId});
-            await categoryStaff.save();            
-        }) 
-        return { success: true }      
+    async createCategoryStaff(data:ICategoryStaff[]):Promise<any>{
+        const add = await this.categoryStaffModel.create( data);
+        // data.categories.forEach(async (category)=>{
+        //     const categoryStaff = new this.categoryStaffModel({categoryId:category,staffId:data.staffId});
+        //     await categoryStaff.save();            
+        // }) 
+        return add ;    
     }
 
-    async findStaffCategories(id:string):Promise<ICategoryStaff[] | undefined>{   
-        console.log(id)                  
-        return await this.categoryStaffModel.find({staffId:id}).exec();
+    async findStaffCategories(id:string):Promise<ICategoryStaff[] | undefined>{
+        return await this.categoryStaffModel.find({staffId:id});
     }
 
 }

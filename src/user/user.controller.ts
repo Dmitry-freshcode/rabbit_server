@@ -167,4 +167,9 @@ export class UserController {
   async getUser(@Body() userid: string): Promise<any> {
     return await this.userDB.findUserById(userid);
   }
+
+  // @Get('test')
+  // async getCategory(@Query('id') id: string,){
+  //   return await this.userDB.getCategory(id);
+  // }
 }
