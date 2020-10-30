@@ -99,6 +99,7 @@ export class LocationRepository {
         $project: {
           loc: 1,
           profile: 1,
+          category: Types.ObjectId(category)
         },
       },
       {

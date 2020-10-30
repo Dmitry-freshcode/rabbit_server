@@ -20,7 +20,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/role/roles.decorator';
 
 @ApiTags('services')
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 @Controller('services')
 export class ServicesController {
   private readonly logger = new Logger(ServicesController.name);
@@ -29,7 +29,7 @@ export class ServicesController {
     private readonly servicesDB: ServiceRepository,
   ) {}
 
-  @Roles(['admin'])
+  //@Roles(['admin'])
   @Post()
   @ApiResponse({
     status: 200,
@@ -38,7 +38,7 @@ export class ServicesController {
   })
   async addService(@Body() service: CreateServiceDto): Promise<IService> {
     this.logger.log(`service ${service.name} was created`);
-    return this.servicesDB.createService(service);
+    return await this.servicesDB.createService(service);
   }
 
   @Roles(['admin'])
@@ -50,7 +50,7 @@ export class ServicesController {
   })
   async deleteService(@Body('id') id: string): Promise<DeleteServiceDto> {
     this.logger.log(`service ${id} was deleted`);
-    return this.servicesDB.delete(id);
+    return await this.servicesDB.delete(id);
   }
 
   @Roles(['admin'])
@@ -62,14 +62,18 @@ export class ServicesController {
   })
   async updateService(@Body() service: IService): Promise<UpdateServiceDto> {
     this.logger.log(`service ${service.name} was updated`);
-    return this.servicesDB.updateService(service);
+    return await this.servicesDB.updateService(service);
+  }
+  @Get('byCategory')
+  async findByCategory(@Query('id') id: string): Promise<IService[] | undefined> {    
+    return await this.servicesDB.findByCategory(id);
   }
   @Get()
   async findService(@Query('id') id: string): Promise<IService | undefined> {
-    return this.servicesDB.find(id);
+    return await this.servicesDB.find(id);
   }
   @Get('findAll')
   async findAllServices(): Promise<IService[] | undefined> {
-    return this.servicesDB.findAll();
+    return await this.servicesDB.findAll();
   }
 }

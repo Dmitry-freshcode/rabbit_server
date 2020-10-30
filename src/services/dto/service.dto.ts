@@ -6,12 +6,7 @@ export class CreateServiceDto {
         format: 'string',
       }) 
     @IsString()    
-    name: string;
-    @ApiProperty({
-        format: 'string',
-      }) 
-    @IsString()
-    imageSrc: string; 
+    name: string;    
     @ApiProperty({
       format: 'string',
     }) 

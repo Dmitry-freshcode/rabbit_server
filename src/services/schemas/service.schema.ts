@@ -7,7 +7,6 @@ export const ServiceSchema = new Schema({
         required:true
     },
     name:{type: String, required:true},
-    imageSrc:{type: String, required:true}
 });
 
 

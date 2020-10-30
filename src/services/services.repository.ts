@@ -31,5 +31,10 @@ export class ServiceRepository{
     async delete(id:string):Promise<DeleteServiceDto>{                
         return await this.serviceModel.deleteOne({_id:id}).exec();
     }
+    async findByCategory(id:string):Promise<IService[] | undefined>{                     
+        return await this.serviceModel.find({categoryId:id}).exec();
+    }
+
+    
 
 }
