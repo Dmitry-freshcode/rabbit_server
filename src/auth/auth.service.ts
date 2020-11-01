@@ -42,7 +42,7 @@ export class AuthService {
       const compare = await bcrypt.compare(password, user.password);
       return compare;
     }
-    if(user.strategy === 'google'){
+    if(user && user.strategy === 'google'){
       throw new HttpException('Login with google', HttpStatus.BAD_REQUEST);
     }
     return null;
