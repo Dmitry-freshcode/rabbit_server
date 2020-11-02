@@ -65,7 +65,8 @@ export class ServicesController {
     return await this.servicesDB.updateService(service);
   }
   @Get('byCategory')
-  async findByCategory(@Query('id') id: string): Promise<IService[] | undefined> {    
+  async findByCategory(@Query('id') id: string): Promise<IService[] | undefined> { 
+    console.log(id)   
     return await this.servicesDB.findByCategory(id);
   }
   @Get()

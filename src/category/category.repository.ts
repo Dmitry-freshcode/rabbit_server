@@ -14,7 +14,17 @@ export class CategoryRepository {
   ) {}
 
   async findAll(): Promise<ICategory[] | undefined> {
-    return await this.categoryModel.find({}).exec();
+    //return await this.categoryModel.find({}).exec();
+    return await this.categoryModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'services', 
+          'localField': '_id', 
+          'foreignField': 'categoryId', 
+          'as': 'services'
+        }
+      }
+    ]);
   }
   async createCategory(Category: any): Promise<ICategory> {
     const service = new this.categoryModel(Category);
@@ -24,7 +34,7 @@ export class CategoryRepository {
     return await this.categoryModel.updateOne({ _id: Category._id }, Category);
   }
   async find(id: string): Promise<ICategory | undefined> {
-    return await this.categoryModel.findOne({ _id: id }).exec();
+    return await this.categoryModel.findOne({ _id: id }).exec();    
   }
   async delete(id: string): Promise<DeleteDto> {
     return await this.categoryModel.deleteOne({ _id: id }).exec();
