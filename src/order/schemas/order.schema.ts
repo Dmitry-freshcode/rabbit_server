@@ -18,8 +18,8 @@ export const OrderSchema = new Schema({
         required:true
     },
     status:{type:String,enum:['done','not performed','performed'],required: true, default:'not performed'},
-    timeStart: {type: Date,required: true},
-    timeEnd: {type: Date,required: true}
+    timeStart: {type: Number,required: true},
+    timeEnd: {type: Number,required: true}
 
 },{
     timestamps: {

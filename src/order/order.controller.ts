@@ -51,16 +51,16 @@ export class OrderController {
       @ApiResponse({ status: 200, description: 'OK', type: [FindOrdersDto] })    
         async findUserOrders(
             @Query('userId') userId:string, 
-            @Query('day') day:Date,   
-        ):Promise<FindOrdersDto[]> {       
-          return this.orderDB.findUserOrders(userId,day);  
+            @Query('day') day:number,   
+        ):Promise<IOrder[]> {       
+          return this.orderService.findUserOrders(userId,day);  
       }
 
       @Get('findStaffOrders')
       @ApiResponse({ status: 200, description: 'OK', type: [FindOrdersDto] })      
         async findStaffOrders(
             @Query('staffId') staffId:string, 
-            @Query('day') day:Date,   
+            @Query('day') day:number,   
         ):Promise<FindOrdersDto[]> {       
           return this.orderDB.findStaffOrders(staffId,day);  
       }

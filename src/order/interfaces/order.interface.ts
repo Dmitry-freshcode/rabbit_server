@@ -6,8 +6,8 @@ export interface IOrder extends Document {
     readonly staffId: string,      
     readonly categoryId: string; 
     readonly status: string;
-    readonly timeStart: Date,
-    readonly timeEnd: Date,
+    readonly timeStart: number,
+    readonly timeEnd: number,
     readonly createdAt?: Date,
     readonly updatedAt?: Date,   
 }

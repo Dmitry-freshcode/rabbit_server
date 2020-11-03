@@ -100,7 +100,7 @@ export class OrderRepository{
       ]
       );
   }
-    async findUserOrders(userId:string,day:Date):Promise<FindOrdersDto[]>{                       
+    async findUserOrders(userId:string,day:number):Promise<FindOrdersDto[]>{                       
         return await this.orderModel.aggregate(
             [
                 {
@@ -165,7 +165,7 @@ export class OrderRepository{
         )
     }
 
-    async findStaffOrders(staffId:string,day:Date):Promise<FindOrdersDto[]>{                       
+    async findStaffOrders(staffId:string,day:number):Promise<FindOrdersDto[]>{                       
         return await this.orderModel.aggregate(
             [
                 {

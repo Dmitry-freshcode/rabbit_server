@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsDateString } from 'class-validator';
+import { IsString, IsDateString, IsArray, IsNumber } from 'class-validator';
 
 export class CreateOrderDto { 
     @ApiProperty({
@@ -20,17 +20,17 @@ export class CreateOrderDto {
     @ApiProperty({
         format: 'Date',
       }) 
-    @IsDateString()    
-    timeStart: Date;
+    @IsNumber()    
+    timeStart: number;
     @ApiProperty({
         format: 'Date',
       }) 
-    @IsDateString()    
-    timeEnd: Date;
+    @IsNumber()    
+    timeEnd: number;
     @ApiProperty({
       format: 'array',
     }) 
-    @IsString()    
+    @IsArray()    
     services: string[];
     
 }
