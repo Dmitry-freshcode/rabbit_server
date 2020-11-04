@@ -20,6 +20,115 @@ export class OrderRepository{
     async findAll(query):Promise<IOrder[] | undefined>{                     
         return await this.orderModel.find(query).exec();
     }
+    async findAllUserOrderAtTime(id:string, timeStart:number,timeEnd:number):Promise<IOrder[] | undefined>{                     
+      return await this.orderModel.aggregate([
+        {
+          '$match': {
+            '$and': [
+              {
+                'userId': Types.ObjectId(id)
+              }, {
+                '$or': [
+                  {
+                    'timeStart': {
+                      '$gte': timeStart, 
+                      '$lte': timeEnd
+                    }
+                  }, {
+                    'timeEnd': {
+                      '$gte': timeStart, 
+                      '$lte': timeEnd
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          '$lookup': {
+            'from': 'profiles', 
+            'localField': 'staffId', 
+            'foreignField': 'userId', 
+            'as': 'staffProfile'
+          }
+        }, {
+          '$unwind': '$staffProfile'
+        }, {
+          '$lookup': {
+            'from': 'categories', 
+            'localField': 'categoryId', 
+            'foreignField': '_id', 
+            'as': 'category'
+          }
+        }, {
+          '$unwind': '$category'
+        }, {
+          '$project': {
+            '_id': 1, 
+            'status': 1, 
+            'timeStart': 1, 
+            'timeEnd': 1, 
+            'staffProfile': 1, 
+            'category': 1
+          }
+        }
+      ]).exec();
+  }
+  async findAllStaffOrderAtTime(id:string, timeStart:number,timeEnd:number):Promise<IOrder[] | undefined>{                     
+    return await this.orderModel.aggregate([
+      {
+        '$match': {
+          '$and': [
+            {
+              'staffId': Types.ObjectId(id)
+            }, {
+              '$or': [
+                {
+                  'timeStart': {
+                    '$gte': timeStart, 
+                    '$lte': timeEnd
+                  }
+                }, {
+                  'timeEnd': {
+                    '$gte': timeStart, 
+                    '$lte': timeEnd
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },{
+        '$lookup': {
+          'from': 'profiles', 
+          'localField': 'userId', 
+          'foreignField': 'userId', 
+          'as': 'userProfile'
+        }
+      }, {
+        '$unwind': '$staffProfile'
+      }, {
+        '$lookup': {
+          'from': 'categories', 
+          'localField': 'categoryId', 
+          'foreignField': '_id', 
+          'as': 'category'
+        }
+      }, {
+        '$unwind': '$category'
+      }, {
+        '$project': {
+          '_id': 1, 
+          'status': 1, 
+          'timeStart': 1, 
+          'timeEnd': 1, 
+          'userProfile': 1, 
+          'category': 1
+        }
+      }
+    ]).exec();
+}
     async createOrder(Order:CreateOrderDto):Promise<IOrder>{
         const order = new this.orderModel(Order);
         return await order.save();
