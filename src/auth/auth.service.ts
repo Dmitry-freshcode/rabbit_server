@@ -53,7 +53,8 @@ export class AuthService {
     if (isExist) {
       const user = await this.usersDB.findUserByEmail(data.email);
       const token = await this.cryptoService.getToken(user)       
-      return await this.UserService.getUserState(token);
+      //return await this.UserService.getUserState(token);
+      return token;
     }
     throw new HttpException('Wrong email or pass', HttpStatus.BAD_REQUEST);
   }

@@ -82,7 +82,8 @@ export class OrderRepository{
           '$and': [
             {
               'staffId': Types.ObjectId(id)
-            }, {
+            },
+             {
               '$or': [
                 {
                   'timeStart': {
@@ -99,7 +100,8 @@ export class OrderRepository{
             }
           ]
         }
-      },{
+      }
+      ,{
         '$lookup': {
           'from': 'profiles', 
           'localField': 'userId', 
@@ -107,7 +109,7 @@ export class OrderRepository{
           'as': 'userProfile'
         }
       }, {
-        '$unwind': '$staffProfile'
+        '$unwind': '$userProfile'
       }, {
         '$lookup': {
           'from': 'categories', 

@@ -67,19 +67,22 @@ export class OrderService {
       .unix(day)
       .endOf('day')
       .unix();
+      
     if (userData.role === 'user') {
-      return await this.orderDB.findAllUserOrderAtTime(
+      const orders = await this.orderDB.findAllUserOrderAtTime(
         userData.id,
         timeStart,
         timeEnd,
-      );
+      );     
+      return orders
     }
     if (userData.role === 'staff') {
-      return await this.orderDB.findAllStaffOrderAtTime(
+      const orders =  await this.orderDB.findAllStaffOrderAtTime(
         userData.id,
         timeStart,
         timeEnd,
-      );
+      );   
+      return orders
     }
   }
 

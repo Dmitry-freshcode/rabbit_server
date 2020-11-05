@@ -59,7 +59,8 @@ export class UserRepository {
   // }, 
   {
       '$project': {
-          '_id': 1, 
+          '_id': 1,
+          'strategy':1, 
           'role': 1, 
           'profile': 1, 
           'location': '$location.loc.coordinates', 

@@ -64,14 +64,14 @@ export class OrderController {
     return this.orderService.findUserOrders(token, day);
   }
 
-  @Get('findStaffOrders')
-  @ApiResponse({ status: 200, description: 'OK', type: [FindOrdersDto] })
-  async findStaffOrders(
-    @Query('staffId') staffId: string,
-    @Query('day') day: number,
-  ): Promise<FindOrdersDto[]> {
-    return this.orderDB.findStaffOrders(staffId, day);
-  }
+  // @Get('findStaffOrders')
+  // @ApiResponse({ status: 200, description: 'OK', type: [FindOrdersDto] })
+  // async findStaffOrders(
+  //   @Query('staffId') staffId: string,
+  //   @Query('day') day: number,
+  // ): Promise<FindOrdersDto[]> {
+  //   return this.orderDB.findStaffOrders(staffId, day);
+  // }
 
   @Get()
   @ApiResponse({ status: 200, description: 'OK', type: [FindOrderDto] })
