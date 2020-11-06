@@ -43,9 +43,6 @@ export class CategoryController {
     private readonly categoryStaffService: CategoryStaffService,
   ) {}
 
-
-  
-  //@Roles(['admin'])
   @Post('staffCategory')
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
@@ -57,15 +54,39 @@ export class CategoryController {
     @Body() data: CreateCategoryStaffDto,
   ): Promise<SuccessDto> {
     this.logger.log(`category for staff: ${data.staffId} was created`);
-    return this.categoryStaffService.addStaffCategory(data);    
+    return this.categoryStaffService.addStaffCategory(data);
     //return this.categoryStaffDB.createCategoryStaff(data);
   }
 
- 
- 
-  //@Roles(['admin'])
+  @Get('staffCategory')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Service was created',
+    type: [CreateCategoryStaffDto],
+  })
+  async getStaffCategory(@Query('id') id: string): Promise<ICategoryStaff[]> {
+    return this.categoryStaffDB.findStaffCategories(id);
+  }
+
+  @Put('staffCategory')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Service was created',
+    type: SuccessDto,
+  })
+  async updateUserStaffCategory(
+    @Body() data: CreateCategoryStaffDto,
+  ): Promise<SuccessDto> {
+    this.logger.log(`category for staff: ${data.staffId} was updated`);   
+    return this.categoryStaffService.updateStaffCategory(data);
+    //return this.categoryStaffDB.createCategoryStaff(data);
+  }
+
+  @Roles(['admin'])
   @Post()
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: 'Category was created',
@@ -79,49 +100,43 @@ export class CategoryController {
           const filename: string = Date.now().toString();
           const extension: string = path.parse(file.originalname).ext;
           cb(null, `${filename}${extension}`);
-        },        
+        },
       }),
-      fileFilter:  (req, file, cb) => {
-        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+      fileFilter: (req, file, cb) => {
+        if (
+          file.mimetype == 'image/png' ||
+          file.mimetype == 'image/jpg' ||
+          file.mimetype == 'image/jpeg'
+        ) {
           cb(null, true);
-        } else { 
+        } else {
           req.fileValidationError = 'goes wrong on the mimetype';
-          cb(null,false);
+          cb(null, false);
         }
-      }, 
+      },
     }),
-  )  
+  )
   async addCategory(
     @UploadedFile() file,
     @Body() category: CreateCategoryDto,
-    @Req() req 
-    ):Promise<ICategory> 
-    {    
-    if(req.fileValidationError){throw new HttpException('Only .png, .jpg and .jpeg format allowed!', HttpStatus.BAD_REQUEST);};
-    const src = `${process.env.APP_URL}/category/image/${file.filename}`;   
+    @Req() req,
+  ): Promise<ICategory> {
+    if (req.fileValidationError) {
+      throw new HttpException(
+        'Only .png, .jpg and .jpeg format allowed!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const src = `${process.env.APP_URL}/category/image/${file.filename}`;
     this.logger.log(`category ${category.name} was created`);
-    return await this.categoryDB.createCategory({...category, imageSrc: src});
- 
+    return await this.categoryDB.createCategory({ ...category, imageSrc: src });
   }
-
 
   @Get('image/:imagename')
   findProfileImage(@Param('imagename') imagename, @Res() res) {
     return res.sendFile(
       path.join(process.cwd(), 'src/uploads/category/' + imagename),
     );
-  }
-
-
-  @Get('staffCategory')
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-    status: 200,
-    description: 'Service was created',
-    type: [CreateCategoryStaffDto],
-  })
-  async getStaffCategory(@Query('id') id: string): Promise<ICategoryStaff[]> {
-    return this.categoryStaffDB.findStaffCategories(id);
   }
 
   @Roles(['admin'])
@@ -169,8 +184,8 @@ export class CategoryController {
     return this.categoryDB.find(id);
   }
 
-  @Get('findAll') 
-  @UseGuards(JwtAuthGuard) 
+  @Get('findAll')
+  @UseGuards(JwtAuthGuard)
   async findAllCategories(): Promise<ICategory[] | undefined> {
     return this.categoryDB.findAll();
   }

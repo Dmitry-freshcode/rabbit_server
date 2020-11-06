@@ -17,7 +17,8 @@ export class ProfileRepository {
   }
 
   async updateProfile(profile: IUserProfile): Promise<UpdateDto> {
-    return await this.userProfileModel.updateOne({ _id: profile._id }, profile);
+    const {userId,...newProfile} = profile;
+    return await this.userProfileModel.updateOne({ userId: userId }, newProfile);   
   }
 
   async createProfile(

@@ -147,6 +147,22 @@ export class UserService {
     return res;
   }
 
+  async updateUser(data:any):Promise<any>{
+    const user = await this.userDB.findUserById(data.userId);
+    if(user){
+      if(data.hasOwnProperty('password') && user.strategy==='local'){
+        const {password, ...newData} = data;
+        await this.profileDB.updateProfile(newData);
+        const passwordHash = await this.cryptoService.passHash(password);
+        await this.userDB.updateById(data.userId,{password:passwordHash})
+      }else{await this.profileDB.updateProfile(data);}
+      return {message: 'success'}
+    }
+    throw new HttpException(
+      'User with this id not found',
+      HttpStatus.CONFLICT)
+  }
+
 
   // async sendMail(token: Promise<string>, user: IUser): Promise<void> {
   //   const transporter = nodemailer.createTransport({

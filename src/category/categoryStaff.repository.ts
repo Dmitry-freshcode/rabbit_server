@@ -29,6 +29,9 @@ export class CategoryStaffRepository{
     async delete(id:string):Promise<DeleteDto>{                
         return await this.categoryStaffModel.deleteOne({_id:id}).exec();
     }
+    async deleteAllStaffCategory(id:string):Promise<DeleteDto>{                
+        return await this.categoryStaffModel.deleteMany({staffId:id}).exec();
+    }
 
     async findStaffCategory(id:string):Promise<any | undefined>{                     
         return await this.categoryStaffModel.findOne({_id:id}).exec();
@@ -42,6 +45,7 @@ export class CategoryStaffRepository{
         // }) 
         return add ;    
     }
+    
 
     async findStaffCategories(id:string):Promise<ICategoryStaff[] | undefined>{
         return await this.categoryStaffModel.find({staffId:id});

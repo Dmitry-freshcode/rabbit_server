@@ -114,8 +114,9 @@ export class UserController {
   @Put('profile')
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, description: 'OK', type: UpdateDto })
-  async updateProfile(@Body() profile: IUserProfile): Promise<UpdateDto> {
-    return this.profileDB.updateProfile(profile);
+  async updateProfile(@Body() profile: any): Promise<UpdateDto> {
+
+    return this.userService.updateUser(profile);
   }
 
   @Post('location')

@@ -117,7 +117,7 @@ export class AuthService {
           email,
           status: 'confirmed',
           strategy: 'google',
-          password: process.env.JWT_SECRET,
+          password: await this.cryptoService.passHash(process.env.JWT_SECRET),
         }); 
         const token =  await this.cryptoService.getToken(newUser); 
         return {access_token:token} ;   

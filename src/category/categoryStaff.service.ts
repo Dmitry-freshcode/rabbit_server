@@ -25,6 +25,11 @@ import { CreateCategoryStaffDto } from './dto/categoryStaff.dto';
         return {category:dbRes};
     }
 
+    async updateStaffCategory(data:CreateCategoryStaffDto):Promise<any>{    
+      const dbDel = await this.categoryStaffDB.deleteAllStaffCategory(data.staffId) 
+      return await this.addStaffCategory(data)  
+  }
+
 
   }
   
