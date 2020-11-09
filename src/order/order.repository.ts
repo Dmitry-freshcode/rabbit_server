@@ -63,14 +63,25 @@ export class OrderRepository{
           }
         }, {
           '$unwind': '$category'
-        }, {
+        },{
+          '$lookup': {
+            'from': 'locations', 
+            'localField': 'staffId', 
+            'foreignField': 'userId', 
+            'as': 'location'
+          }
+        },{
+          '$unwind': '$location'
+        },
+         {
           '$project': {
             '_id': 1, 
             'status': 1, 
             'timeStart': 1, 
             'timeEnd': 1, 
             'staffProfile': 1, 
-            'category': 1
+            'category': 1,
+            'location': 1
           }
         }
       ]).exec();
@@ -120,13 +131,23 @@ export class OrderRepository{
       }, {
         '$unwind': '$category'
       }, {
+        '$lookup': {
+          'from': 'locations', 
+          'localField': 'userId', 
+          'foreignField': 'userId', 
+          'as': 'location'
+        }
+      },{
+        '$unwind': '$location'
+      },{
         '$project': {
           '_id': 1, 
           'status': 1, 
           'timeStart': 1, 
           'timeEnd': 1, 
           'userProfile': 1, 
-          'category': 1
+          'category': 1,
+          'location':1
         }
       }
     ]).exec();
