@@ -11,6 +11,7 @@ export const MessageSchema = new Schema({
         ref: 'Chat',
         required:true
     },
+    addTime: {type: Number,required:true},
     message: {type: String, required:true},        
 },{
     timestamps: {

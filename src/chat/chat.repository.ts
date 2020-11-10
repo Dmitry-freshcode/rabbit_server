@@ -20,18 +20,20 @@ export class ChatRepository{
         return await this.chatModel.find({chatId}).exec();
     }
     async createChat():Promise<IChat>{
-        const chat = new this.chatModel();
-        return await chat.save();
+        const newChat = new this.chatModel();
+        return await newChat.save();
     }
     async updateChat(Chat:IChat):Promise<UpdateDto>{  
         return await this.chatModel.updateOne({_id:Chat._id},Chat);
     }
-    // async find(id:string):Promise<IChat | undefined>{                     
-    //     return await this.chatModel.findOne({_id:id}).exec();
-    // }
+    async find(query:any):Promise<IChat | undefined>{                     
+        return await this.chatModel.findOne(query).exec();
+    }
     async delete(id:string):Promise<DeleteDto>{                
         return await this.chatModel.deleteOne({_id:id}).exec();
     }
+   
+    
     
 
 }

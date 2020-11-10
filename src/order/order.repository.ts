@@ -133,7 +133,7 @@ export class OrderRepository{
       }, {
         '$lookup': {
           'from': 'locations', 
-          'localField': 'userId', 
+          'localField': 'usernpm run statId', 
           'foreignField': 'userId', 
           'as': 'location'
         }

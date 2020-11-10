@@ -32,6 +32,48 @@ export class ChatMemberRepository{
     async delete(id:string):Promise<DeleteDto>{                
         return await this.chatMemberModel.deleteOne({_id:id}).exec();
     }
+    async findByUsers(data:any):Promise<any>{                
+      return await this.chatMemberModel.aggregate([
+        {
+          '$match': {
+            '$or': [
+              {
+                'userId': Types.ObjectId(data.userId)
+              }, {
+                'userId': Types.ObjectId(data.staffId)
+              }
+            ]
+          }
+        }, {
+          '$group': {
+            '_id': {
+              '_id': '$chatId'
+            }, 
+            'count': {
+              '$sum': 1
+            }
+          }
+        }, {
+          '$match': {
+            'count': {
+              '$gte': 2
+            }
+          }
+        }, {
+          '$project': {
+            '_id': '$_id._id'
+          }
+        }, {
+          '$lookup': {
+            'from': 'messages', 
+            'localField': '_id', 
+            'foreignField': 'chatId', 
+            'as': 'messages'
+          }
+        }
+      ]);
+  }
+    
     async getUserChats(id:string):Promise<UserChatsDto[]>{                     
         return await this.chatMemberModel.aggregate(
           [
