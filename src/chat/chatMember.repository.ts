@@ -69,7 +69,21 @@ export class ChatMemberRepository{
             'localField': '_id', 
             'foreignField': 'chatId', 
             'as': 'messages'
-          }
+          },
+        },{
+          '$lookup': {
+            'from': 'chatmembers', 
+            'localField': '_id', 
+            'foreignField': 'chatId', 
+            'as': 'users'
+          },
+        },{
+          '$lookup': {
+            'from': 'profiles', 
+            'localField': 'users.userId', 
+            'foreignField': 'userId', 
+            'as': 'users'
+          },
         }
       ]);
   }

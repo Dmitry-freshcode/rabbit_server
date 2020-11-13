@@ -26,7 +26,6 @@ export class ChatService {
       userId: data.staffId,
       chatId: chat._id,
     });
-
     return chat;
   }
 
@@ -34,10 +33,11 @@ export class ChatService {
     const users = { userId, staffId };
     const chat = await this.chatMemberDB.findByUsers(users);
     if (chat.length > 0) {
-      return chat;
+      return chat[0];
     }
     await this.createChat(users);
-    return await this.chatMemberDB.findByUsers(users);
+    const newChat = await this.chatMemberDB.findByUsers(users)
+    return newChat[0];
   }
 
   // async getMessage(chatId:string):Promise<IMessage[] | undefined>{
