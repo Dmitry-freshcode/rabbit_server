@@ -47,6 +47,15 @@ export class ChatController {
 
   @Get()
   @ApiResponse({ status: 200, description: 'OK', type: [UserChatsDto] })
+  async getChat(
+    @Query('chatId') chatId: string  
+  ): Promise<any> {
+    const chat = await this.chatDB.getChat(chatId)
+    return chat[0];
+  }
+
+  @Get('getChatById')
+  @ApiResponse({ status: 200, description: 'OK', type: [UserChatsDto] })
   async getChats(
     @Query('userId') userId: string,
     @Query('staffId') staffId: string,
@@ -54,7 +63,7 @@ export class ChatController {
     return this.chatService.getChat(userId, staffId);
   }
 
-  @Get('UserChats')
+  @Get('userChats')
   @ApiResponse({ status: 200, description: 'OK', type: [UserChatsDto] })
   async getUserChats(@Query('userId') userId: string): Promise<UserChatsDto[]> {
     return this.chatMemberDB.getUserChats(userId);

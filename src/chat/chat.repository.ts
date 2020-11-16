@@ -1,5 +1,5 @@
 import { IChat} from './interfaces/chat.interface';
-import { Model } from 'mongoose';
+import { Model ,Types } from 'mongoose';
 import { DeleteDto } from '../shared/dto/delete.dto';
 import { UpdateDto } from '../shared/dto/update.dto';
 //import { CreateChatDto } from './dto/chats.dto';
@@ -15,6 +15,37 @@ export class ChatRepository{
 
       
         ){}
+
+    async getChat(chatId:string):Promise<any | undefined>{
+        return await this.chatModel.aggregate([
+            {
+              '$match': {
+                '_id': Types.ObjectId(chatId)
+              }
+            }, {
+              '$lookup': {
+                'from': 'chatmembers', 
+                'localField': '_id', 
+                'foreignField': 'chatId', 
+                'as': 'users'
+              }
+            }, {
+              '$lookup': {
+                'from': 'profiles', 
+                'localField': 'users.userId', 
+                'foreignField': 'userId', 
+                'as': 'users'
+              }
+            }, {
+              '$lookup': {
+                'from': 'messages', 
+                'localField': '_id', 
+                'foreignField': 'chatId', 
+                'as': 'messages'
+              }
+            }
+          ]);
+    }
 
     async findAll(chatId: string):Promise<IChat[] | undefined>{                     
         return await this.chatModel.find({chatId}).exec();

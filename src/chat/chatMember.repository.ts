@@ -102,21 +102,24 @@ export class ChatMemberRepository{
                   'foreignField': 'chatId', 
                   'as': 'members'
                 }
-              }, {
-                '$lookup': {
-                  'from': 'users', 
-                  'localField': 'members.userId', 
-                  'foreignField': '_id', 
-                  'as': 'users'
-                }
-              }, {
-                '$lookup': {
-                  'from': 'images', 
-                  'localField': 'users._id', 
-                  'foreignField': 'userId', 
-                  'as': 'usersImg'
-                }
-              }, {
+              },
+              //  {
+              //   '$lookup': {
+              //     'from': 'users', 
+              //     'localField': 'members.userId', 
+              //     'foreignField': '_id', 
+              //     'as': 'users'
+              //   }
+              // },
+              //  {
+              //   '$lookup': {
+              //     'from': 'images', 
+              //     'localField': 'users._id', 
+              //     'foreignField': 'userId', 
+              //     'as': 'usersImg'
+              //   }
+              // },
+               {
                 '$lookup': {
                   'from': 'messages', 
                   'localField': 'chatId', 
@@ -132,10 +135,12 @@ export class ChatMemberRepository{
                 }
               }, {
                 '$project': {
+                  '_id':0,
+                  'chatId':1,
                   'created_at': 1, 
                   'updated_at': 1, 
-                  'users': 1, 
-                  'usersImg': 1, 
+                  //'users': 1, 
+                  //'usersImg': 1, 
                   'usersProfiles': 1, 
                   'messages': {
                     '$size': '$msg'
