@@ -29,6 +29,21 @@ export class ChatService {
     return chat;
   }
 
+  async deleteChat (chatId:string):Promise<any>{
+    try{
+      await this.chatMemberDB.deleteAll(chatId);
+      await this.messageDB.deleteAll(chatId);
+      await this.chatDB.delete(chatId);
+      this.logger.log(`Chat with id: ${chatId} deleted`)
+      return {status:'success'}
+    }catch (e){
+      throw new HttpException(
+        'Chat delete error',
+        HttpStatus.CONFLICT)
+    }
+    
+  }
+
   async getChat(userId: string, staffId: string): Promise<any> {
     const users = { userId, staffId };
     const chat = await this.chatMemberDB.findByUsers(users);

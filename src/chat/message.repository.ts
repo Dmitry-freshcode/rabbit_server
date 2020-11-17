@@ -23,6 +23,10 @@ export class MessageRepository{
         const message = new this.messageModel(Message);
         return await message.save();
     }
+
+    async deleteAll(chatId:string):Promise<any | undefined>{
+      return await this.messageModel.deleteMany({chatId});
+    }
     async updateMessage(Message:IMessage):Promise<UpdateDto>{  
         return await this.messageModel.updateOne({_id:Message._id},Message);
     }
@@ -32,6 +36,9 @@ export class MessageRepository{
     async delete(id:string):Promise<DeleteDto>{                
         return await this.messageModel.deleteOne({_id:id}).exec();
     }
+
+
+
     async getChatMsgs(id:string):Promise<ChatMessageDto[]>{                           
         return await this.messageModel.aggregate([
             {

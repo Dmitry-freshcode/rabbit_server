@@ -6,6 +6,7 @@ import {
   UseGuards,
   Get,
   Post,
+  Delete,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { ChatService } from './chat.service';
@@ -39,10 +40,19 @@ export class ChatController {
     return this.chatService.createChat(data);
   }
 
-  @Post('Message')
+  @Post('message')
   @ApiResponse({ status: 200, description: 'OK', type: CreateMessageDto })
   async addMessage(@Body() msg: CreateMessageDto): Promise<IMessage> {
     return this.messageDB.createMessage(msg);
+  }
+
+  @Get('messages')
+  @ApiResponse({ status: 200, description: 'OK', type: String })
+  async getMsgs(
+    @Query('chatId') chatId: string  
+  ): Promise<any> {
+    const msgs = await this.messageDB.findAll(chatId)
+    return msgs;
   }
 
   @Get()
@@ -52,6 +62,15 @@ export class ChatController {
   ): Promise<any> {
     const chat = await this.chatDB.getChat(chatId)
     return chat[0];
+  }
+
+  @Delete()
+  @ApiResponse({ status: 200, description: 'OK', type: [UserChatsDto] })
+  async deleteChat(
+    @Query('chatId') chatId: string  
+  ): Promise<any> {
+    const result = await this.chatService.deleteChat(chatId)
+    return result;
   }
 
   @Get('getChatById')

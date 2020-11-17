@@ -19,6 +19,10 @@ export class ChatMemberRepository{
     async findAll():Promise<IChatMember[] | undefined>{                     
         return await this.chatMemberModel.find({}).exec();
     }
+    async deleteAll(chatId:string):Promise<any | undefined>{
+      return await this.chatMemberModel.deleteMany({chatId:chatId});
+    }
+
     async createChatMember(ChatMember:CreateChatMemberDto):Promise<IChatMember>{
         const chatMember = new this.chatMemberModel(ChatMember);
         return await chatMember.save();
